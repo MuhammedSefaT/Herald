@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>Herald</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>MediatR ile aynı kullanım şekline sahip, sıfırdan yazılmış mediator kütüphanesi. İstek/handler, bildirim ve pipeline behavior desteği ile Microsoft.Extensions.DependencyInjection üzerinden AddHerald kaydı sağlar.</Description>
+    <PackageTags>mediator;cqrs;request;notification;pipeline</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Herald.Abstractions\Herald.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

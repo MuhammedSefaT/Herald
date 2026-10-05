@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>Herald</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>Herald mediator kütüphanesinin sözleşmeleri: istek, handler, bildirim ve pipeline behavior arayüzleri ile Unit tipi. Hiçbir bağımlılığı yoktur; Application ve Infrastructure katmanlarından referans verilmek üzere tasarlanmıştır.</Description>
+    <PackageTags>mediator;cqrs;request;notification;pipeline</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
+</Project>
