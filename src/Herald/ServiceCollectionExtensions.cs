@@ -47,8 +47,8 @@ public static class ServiceCollectionExtensions
         if (heraldConfiguration.Assemblies.Count == 0)
         {
             throw new ArgumentException(
-                "Handler'ların taranacağı en az bir assembly kaydedilmelidir. Yapılandırmada RegisterServicesFromAssembly, " +
-                "RegisterServicesFromAssemblies veya RegisterServicesFromAssemblyContaining<T> kullanın.",
+                "At least one assembly must be registered for handler scanning. Call RegisterServicesFromAssembly, " +
+                "RegisterServicesFromAssemblies or RegisterServicesFromAssemblyContaining<T> in the configuration.",
                 nameof(configuration));
         }
 
@@ -113,7 +113,7 @@ public static class ServiceCollectionExtensions
             if (handlerNames.Count > 1)
             {
                 conflicts.Add(
-                    $"'{group.Key.GetGenericArguments()[0].FullName}' isteği için birden fazla handler bulundu: " +
+                    $"Multiple handlers were found for request '{group.Key.GetGenericArguments()[0].FullName}': " +
                     $"{string.Join(", ", handlerNames)}.");
             }
             else if (existingHandlers.Count == 0)
@@ -126,7 +126,7 @@ public static class ServiceCollectionExtensions
         {
             throw new InvalidOperationException(
                 string.Join(Environment.NewLine, conflicts) + Environment.NewLine +
-                "Her istek tipinin yalnızca bir handler'ı olabilir.");
+                "Each request type can have only one handler.");
         }
 
         return newHandlers;
@@ -135,5 +135,5 @@ public static class ServiceCollectionExtensions
     private static string DescribeImplementation(ServiceDescriptor descriptor) =>
         descriptor.ImplementationType?.FullName
         ?? descriptor.ImplementationInstance?.GetType().FullName
-        ?? "factory ile kaydedilmiş bir handler";
+        ?? "a handler registered with a factory";
 }

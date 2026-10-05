@@ -43,8 +43,8 @@ internal abstract class RequestHandlerBase
     }
 
     protected static InvalidOperationException HandlerNotFound(Type requestType) =>
-        new($"'{requestType.FullName}' isteği için kayıtlı bir handler bulunamadı. " +
-            "Handler'ın bulunduğu assembly AddHerald ile kaydedildi mi?");
+        new($"No handler is registered for request '{requestType.FullName}'. " +
+            "Was the assembly that contains the handler registered with AddHerald?");
 }
 
 /// <summary>

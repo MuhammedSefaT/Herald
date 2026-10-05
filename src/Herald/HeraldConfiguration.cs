@@ -114,7 +114,7 @@ public sealed class HeraldConfiguration
         if (!openBehaviorType.IsGenericTypeDefinition)
         {
             throw new ArgumentException(
-                $"'{openBehaviorType.FullName}' açık generic bir tip değil. Behavior typeof(LoggingBehavior<,>) biçiminde verilmelidir.",
+                $"Type '{openBehaviorType.FullName}' is not an open generic type. Pass the behavior as typeof(LoggingBehavior<,>).",
                 nameof(openBehaviorType));
         }
 
@@ -124,7 +124,7 @@ public sealed class HeraldConfiguration
         if (!implementsPipelineBehavior)
         {
             throw new ArgumentException(
-                $"'{openBehaviorType.FullName}' tipi IPipelineBehavior<TRequest, TResponse> arayüzünü uygulamıyor.",
+                $"Type '{openBehaviorType.FullName}' does not implement IPipelineBehavior<TRequest, TResponse>.",
                 nameof(openBehaviorType));
         }
 

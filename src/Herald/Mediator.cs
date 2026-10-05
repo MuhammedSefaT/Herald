@@ -60,8 +60,8 @@ public sealed class Mediator : IMediator
         if (request is not IBaseRequest)
         {
             throw new ArgumentException(
-                $"'{request.GetType().FullName}' tipi {nameof(IBaseRequest)} arayüzünü uygulamıyor. " +
-                "Gönderilen istek IRequest veya IRequest<TResponse> uygulamalıdır.",
+                $"Type '{request.GetType().FullName}' does not implement {nameof(IBaseRequest)}. " +
+                "A request must implement IRequest or IRequest<TResponse>.",
                 nameof(request));
         }
 
@@ -85,7 +85,7 @@ public sealed class Mediator : IMediator
         if (notification is not INotification)
         {
             throw new ArgumentException(
-                $"'{notification.GetType().FullName}' tipi {nameof(INotification)} arayüzünü uygulamıyor.",
+                $"Type '{notification.GetType().FullName}' does not implement {nameof(INotification)}.",
                 nameof(notification));
         }
 
@@ -114,7 +114,7 @@ public sealed class Mediator : IMediator
             (true, 0) => typeof(VoidRequestHandlerWrapper<>).MakeGenericType(requestType),
             (false, 1) => typeof(RequestHandlerWrapper<,>).MakeGenericType(requestType, responseTypes[0]),
             _ => throw new InvalidOperationException(
-                $"'{requestType.FullName}' istek tipi IRequest veya IRequest<TResponse> arayüzlerinden tam olarak birini uygulamalıdır."),
+                $"Request type '{requestType.FullName}' must implement exactly one of IRequest or IRequest<TResponse>."),
         };
 
         return (RequestHandlerBase)Activator.CreateInstance(wrapperType)!;
