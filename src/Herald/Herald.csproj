@@ -8,7 +8,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <Description>A lightweight mediator library for .NET with requests and handlers, notifications and pipeline behaviors. Register it with AddHerald on Microsoft.Extensions.DependencyInjection.</Description>
-    <PackageTags>mediator;cqrs;request;notification;pipeline</PackageTags>
+    <PackageId>MSTYZ.Herald</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

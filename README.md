@@ -10,10 +10,12 @@ Herald is a lightweight mediator library for .NET. It sends requests to their ha
 
 | Package | Contents | Dependencies |
 |---|---|---|
-| `Herald.Abstractions` | `IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher`, `IHerald`, `Unit` | None |
-| `Herald` | `AddHerald`, `HeraldConfiguration` | `Herald.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions` 8.x |
+| `MSTYZ.Herald.Abstractions` | `IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher`, `IHerald`, `Unit` | None |
+| `MSTYZ.Herald` | `AddHerald`, `HeraldConfiguration` | `MSTYZ.Herald.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions` 8.x |
 
 All public types are in the `Herald` namespace.
+
+The package IDs start with `MSTYZ.`, but the namespace is `Herald`, so code uses `using Herald;`.
 
 ## Installation
 
@@ -23,21 +25,21 @@ Herald requires .NET 8 or later. Add the package that each project needs (see [L
 
 ```bash
 # The project that registers services (for example, the API or host project)
-dotnet add package Herald
+dotnet add package MSTYZ.Herald
 
 # Projects that only define or use requests, handlers, notifications and behaviors
-dotnet add package Herald.Abstractions
+dotnet add package MSTYZ.Herald.Abstractions
 ```
 
 Or add the references to the project file:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Herald" Version="1.0.0" />
+  <PackageReference Include="MSTYZ.Herald" Version="1.0.0" />
 </ItemGroup>
 ```
 
-The `Herald` package brings in `Herald.Abstractions`, so a project that references `Herald` does not need both.
+The `MSTYZ.Herald` package brings in `MSTYZ.Herald.Abstractions`, so a project that references `MSTYZ.Herald` does not need both.
 
 ### From source
 
@@ -49,7 +51,7 @@ To use a local build instead of nuget.org:
    dotnet pack -c Release -o ./artifacts
    ```
 
-2. Add a `nuget.config` file to the root of the solution that uses Herald. Replace the example path `/path/to/Herald/artifacts` with the `artifacts` folder of your clone. The path can be absolute or relative to `nuget.config`. With package source mapping, `Herald` and `Herald.*` come only from the local folder and every other package comes from nuget.org.
+2. Add a `nuget.config` file to the root of the solution that uses Herald. Replace the example path `/path/to/Herald/artifacts` with the `artifacts` folder of your clone. The path can be absolute or relative to `nuget.config`. With package source mapping, `MSTYZ.Herald` and `MSTYZ.Herald.*` come only from the local folder and every other package comes from nuget.org.
 
    ```xml
    <?xml version="1.0" encoding="utf-8"?>
@@ -64,8 +66,8 @@ To use a local build instead of nuget.org:
          <package pattern="*" />
        </packageSource>
        <packageSource key="herald">
-         <package pattern="Herald" />
-         <package pattern="Herald.*" />
+         <package pattern="MSTYZ.Herald" />
+         <package pattern="MSTYZ.Herald.*" />
        </packageSource>
      </packageSourceMapping>
    </configuration>
@@ -184,9 +186,9 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior
 | Layer | Package reference |
 |---|---|
 | Domain | None |
-| Application | `Herald.Abstractions` |
-| Infrastructure | `Herald.Abstractions` |
-| API (composition root) | `Herald` |
+| Application | `MSTYZ.Herald.Abstractions` |
+| Infrastructure | `MSTYZ.Herald.Abstractions` |
+| API (composition root) | `MSTYZ.Herald` |
 
 Requests, handlers, notifications and behaviors only need the contracts. Call `AddHerald` only in the composition root.
 
@@ -194,7 +196,7 @@ Requests, handlers, notifications and behaviors only need the contracts. Call `A
 
 In a project that already uses the `IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher` and `Unit` contracts:
 
-1. Remove the references to the previous mediator packages and add `Herald` and `Herald.Abstractions`.
+1. Remove the references to the previous mediator packages and add `MSTYZ.Herald` and `MSTYZ.Herald.Abstractions`.
 2. Change the namespace in the `global using` line to `Herald` and register the services with `AddHerald`:
 
    ```csharp
@@ -214,6 +216,13 @@ Herald does not provide:
 - Custom publishing strategies, such as publishing notifications in parallel
 
 Handlers are resolved by the exact type of the request or notification: a handler written for a base notification type is not called for derived notifications. Open generic handlers are not scanned.
+
+## Author
+
+Muhammed Sefa Tayaz
+
+- Website: https://msefatayaz.com
+- GitHub: https://github.com/MuhammedSefaT
 
 ## License
 

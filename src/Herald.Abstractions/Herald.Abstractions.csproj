@@ -8,7 +8,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <Description>Contracts for the Herald mediator library: request, handler, notification and pipeline behavior interfaces and the Unit type. Has no dependencies, so application and infrastructure layers can reference it.</Description>
-    <PackageTags>mediator;cqrs;request;notification;pipeline</PackageTags>
+    <PackageId>MSTYZ.Herald.Abstractions</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

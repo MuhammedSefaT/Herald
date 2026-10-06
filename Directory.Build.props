@@ -11,8 +11,10 @@
     <Version>1.0.0</Version>
     <Authors>Muhammed Sefa Tayaz</Authors>
     <Copyright>Copyright (c) 2026 Muhammed Sefa Tayaz</Copyright>
+    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+    <PackageTags>mediator;cqrs;request;notification;pipeline;dotnet;dependency-injection;clean-architecture;messaging</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://msefatayaz.com/</PackageProjectUrl>
+    <PackageProjectUrl>https://msefatayaz.com</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MuhammedSefaT/Herald</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <IsPackable>false</IsPackable>
