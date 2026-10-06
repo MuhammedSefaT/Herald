@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Herald;
 
 /// <summary>
-/// Dönüş değeri olmayan istekler için tip güvenli giriş noktası.
+/// Type-safe entry point for requests that do not return a value.
 /// </summary>
 internal abstract class VoidRequestHandlerWrapper : RequestHandlerBase
 {
@@ -11,9 +11,9 @@ internal abstract class VoidRequestHandlerWrapper : RequestHandlerBase
 }
 
 /// <summary>
-/// <see cref="IRequestHandler{TRequest}"/> handler'ını DI'dan alıp pipeline içinde çalıştırır.
-/// Pipeline içinde dönüş tipi <see cref="Unit"/> olur; böylece bu istekler de
-/// <see cref="IPipelineBehavior{TRequest, TResponse}"/> ile yakalanır.
+/// Resolves the <see cref="IRequestHandler{TRequest}"/> handler from DI and runs it inside the pipeline.
+/// Inside the pipeline the response type is <see cref="Unit"/>, so these requests also pass through
+/// <see cref="IPipelineBehavior{TRequest, TResponse}"/>.
 /// </summary>
 internal sealed class VoidRequestHandlerWrapper<TRequest> : VoidRequestHandlerWrapper
     where TRequest : IRequest

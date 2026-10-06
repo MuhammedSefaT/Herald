@@ -279,8 +279,8 @@ public sealed class RegistrationTests
     }
 
     /// <summary>
-    /// Aynı istek için iki handler içeren bir assembly üretir. Test assembly'sine böyle iki handler konsaydı
-    /// test assembly'sini tarayan tüm testler çakışma hatası alırdı.
+    /// Builds an assembly that contains two handlers for the same request. If the test assembly contained
+    /// such handlers, every test that scans the test assembly would fail with a conflict.
     /// </summary>
     private static Assembly CreateAssemblyWithTwoHandlersForConflictRequest()
     {

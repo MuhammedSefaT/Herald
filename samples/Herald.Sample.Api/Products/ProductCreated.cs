@@ -2,28 +2,28 @@ using Herald;
 
 namespace Herald.Sample.Api.Products;
 
-// Bildirim: bir ürün oluşturulduğunda yayınlanır. Birden fazla handler'ı olabilir.
+// Notification published when a product is created. It can have more than one handler.
 public sealed record ProductCreatedNotification(Guid ProductId, string Name) : INotification;
 
-// Birinci handler: olayı loglar.
+// First handler: logs the event.
 public sealed class ProductCreatedLogHandler(ILogger<ProductCreatedLogHandler> logger)
     : INotificationHandler<ProductCreatedNotification>
 {
     public Task Handle(ProductCreatedNotification notification, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Ürün oluşturuldu: {ProductId} ({Name})", notification.ProductId, notification.Name);
+        logger.LogInformation("Created product {ProductId} ({Name})", notification.ProductId, notification.Name);
         return Task.CompletedTask;
     }
 }
 
-// İkinci handler: gerçek bir uygulamada burada e-posta gönderilirdi; örnekte sadece loglanır.
-// Handler'lar kayıt sırasıyla, birbiri ardına çalışır.
+// Second handler: a real application would send an email here; the sample only logs.
+// Handlers run one after another in registration order.
 public sealed class ProductCreatedEmailHandler(ILogger<ProductCreatedEmailHandler> logger)
     : INotificationHandler<ProductCreatedNotification>
 {
     public Task Handle(ProductCreatedNotification notification, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Satış ekibine yeni ürün e-postası gönderildi: {Name}", notification.Name);
+        logger.LogInformation("Sent new product email to the sales team: {Name}", notification.Name);
         return Task.CompletedTask;
     }
 }

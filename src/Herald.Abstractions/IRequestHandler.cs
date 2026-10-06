@@ -1,34 +1,34 @@
 namespace Herald;
 
 /// <summary>
-/// Dönüş değeri olan bir isteği işleyen handler.
-/// Her istek tipi için tam olarak bir handler bulunmalıdır.
+/// Handles a request that returns a value.
+/// Each request type must have exactly one handler.
 /// </summary>
-/// <typeparam name="TRequest">İşlenen istek tipi.</typeparam>
-/// <typeparam name="TResponse">İsteğin dönüş tipi.</typeparam>
+/// <typeparam name="TRequest">The type of request being handled.</typeparam>
+/// <typeparam name="TResponse">The type of the response.</typeparam>
 public interface IRequestHandler<in TRequest, TResponse> where TRequest : IRequest<TResponse>
 {
     /// <summary>
-    /// İsteği işler ve sonucu döndürür.
+    /// Handles the request and returns the response.
     /// </summary>
-    /// <param name="request">İşlenecek istek.</param>
-    /// <param name="cancellationToken">İptal token'ı.</param>
-    /// <returns>İsteğin sonucu.</returns>
+    /// <param name="request">The request to handle.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The response to the request.</returns>
     Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken);
 }
 
 /// <summary>
-/// Dönüş değeri olmayan bir isteği işleyen handler.
-/// Her istek tipi için tam olarak bir handler bulunmalıdır.
+/// Handles a request that does not return a value.
+/// Each request type must have exactly one handler.
 /// </summary>
-/// <typeparam name="TRequest">İşlenen istek tipi.</typeparam>
+/// <typeparam name="TRequest">The type of request being handled.</typeparam>
 public interface IRequestHandler<in TRequest> where TRequest : IRequest
 {
     /// <summary>
-    /// İsteği işler.
+    /// Handles the request.
     /// </summary>
-    /// <param name="request">İşlenecek istek.</param>
-    /// <param name="cancellationToken">İptal token'ı.</param>
-    /// <returns>İşlemin tamamlanmasını temsil eden task.</returns>
+    /// <param name="request">The request to handle.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that represents the operation.</returns>
     Task Handle(TRequest request, CancellationToken cancellationToken);
 }

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 namespace Herald.Tests.Infrastructure;
 
 /// <summary>
-/// Handler ve behavior'ların hangi sırayla çalıştığını kaydeden, thread-safe kayıt listesi.
+/// Thread-safe list that records the order in which handlers and behaviors run.
 /// </summary>
 public sealed class CallLog
 {

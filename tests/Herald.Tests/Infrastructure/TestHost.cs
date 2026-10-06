@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Herald.Tests.Infrastructure;
 
 /// <summary>
-/// Test assembly'sini tarayan gerçek bir <see cref="ServiceCollection"/> kurar.
+/// Builds a real <see cref="ServiceCollection"/> that scans the test assembly.
 /// </summary>
 public static class TestHost
 {

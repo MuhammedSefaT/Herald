@@ -2,7 +2,7 @@ using Herald.Tests.Infrastructure;
 
 namespace Herald.Tests.Fixtures;
 
-// İki handler'ı olan bildirim. ThrowFrom, exception fırlatması istenen handler'ın adıdır.
+// Notification with two handlers. ThrowFrom is the name of the handler that should throw.
 public sealed record OrderPlaced(string? ThrowFrom = null) : INotification;
 
 public sealed class FirstOrderPlacedHandler(CallLog log) : INotificationHandler<OrderPlaced>
@@ -37,10 +37,10 @@ public sealed class SecondOrderPlacedHandler(CallLog log) : INotificationHandler
     }
 }
 
-// Handler'ı olmayan bildirim.
+// Notification without handlers.
 public sealed record NobodyListens : INotification;
 
-// Önbellek testleri için yalnızca o testlerde kullanılan bildirim.
+// Notification used only by the cache tests.
 public sealed record ParallelNotification(int Value) : INotification;
 
 public sealed class ParallelNotificationHandler(CallLog log) : INotificationHandler<ParallelNotification>

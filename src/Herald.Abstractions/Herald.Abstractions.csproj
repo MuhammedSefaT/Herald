@@ -7,7 +7,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
-    <Description>Herald mediator kütüphanesinin sözleşmeleri: istek, handler, bildirim ve pipeline behavior arayüzleri ile Unit tipi. Hiçbir bağımlılığı yoktur; Application ve Infrastructure katmanlarından referans verilmek üzere tasarlanmıştır.</Description>
+    <Description>Contracts for the Herald mediator library: request, handler, notification and pipeline behavior interfaces and the Unit type. Has no dependencies, so application and infrastructure layers can reference it.</Description>
     <PackageTags>mediator;cqrs;request;notification;pipeline</PackageTags>
   </PropertyGroup>
 

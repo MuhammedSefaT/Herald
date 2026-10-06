@@ -1,29 +1,55 @@
 # Herald
 
-Herald, .NET uygulamaları için hafif bir mediator kütüphanesidir. İstekleri handler'lara, bildirimleri dinleyicilerine iletir; loglama ve doğrulama gibi kesişen işleri pipeline behavior'larla çözer.
+> **Note:** Herald is developed for my personal projects. It is MIT licensed and provided as is: no support is offered, and backward compatibility between versions is not guaranteed.
 
-- İstek/handler (dönüş değerli ve dönüşsüz), bildirim (notification) ve pipeline behavior desteği
-- `Microsoft.Extensions.DependencyInjection` ile `AddHerald` kaydı
-- `net8.0` ve `net10.0`
+Herald is a lightweight mediator library for .NET. It sends requests to their handlers, publishes notifications to every interested handler, and runs cross-cutting concerns such as logging and validation through pipeline behaviors.
 
-| Paket | İçerik | Bağımlılık |
+- Requests with and without a response, notifications and pipeline behaviors
+- Registration with `AddHerald` on `Microsoft.Extensions.DependencyInjection`
+- Targets `net8.0` and `net10.0`
+
+| Package | Contents | Dependencies |
 |---|---|---|
-| `Herald.Abstractions` | `IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher`, `IHerald`, `Unit` | Yok |
+| `Herald.Abstractions` | `IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher`, `IHerald`, `Unit` | None |
 | `Herald` | `AddHerald`, `HeraldConfiguration` | `Herald.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions` 8.x |
 
-Tüm public tipler `Herald` namespace'indedir.
+All public types are in the `Herald` namespace.
 
-## Kurulum
+## Installation
 
-Paketler NuGet.org'da yayınlanmaz, lokal bir klasörden kullanılır.
+### From nuget.org
 
-1. Herald reposunun kökünde paketleri üretin:
+Herald requires .NET 8 or later. Add the package that each project needs (see [Layers](#layers)):
+
+```bash
+# The project that registers services (for example, the API or host project)
+dotnet add package Herald
+
+# Projects that only define or use requests, handlers, notifications and behaviors
+dotnet add package Herald.Abstractions
+```
+
+Or add the references to the project file:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Herald" Version="1.0.0" />
+</ItemGroup>
+```
+
+The `Herald` package brings in `Herald.Abstractions`, so a project that references `Herald` does not need both.
+
+### From source
+
+To use a local build instead of nuget.org:
+
+1. Build the packages in the root of the Herald repository:
 
    ```bash
    dotnet pack -c Release -o ./artifacts
    ```
 
-2. Herald'ı kullanacak solution'ın köküne bir `nuget.config` ekleyin. `herald` kaynağındaki `/path/to/Herald/artifacts` örnek yolunu kendi klonunuzun `artifacts` klasörüyle değiştirin; yol mutlak ya da `nuget.config` dosyasına göre göreceli olabilir. Package source mapping sayesinde `Herald` ve `Herald.*` paketleri yalnızca lokal klasörden, diğer paketler nuget.org'dan gelir.
+2. Add a `nuget.config` file to the root of the solution that uses Herald. Replace the example path `/path/to/Herald/artifacts` with the `artifacts` folder of your clone. The path can be absolute or relative to `nuget.config`. With package source mapping, `Herald` and `Herald.*` come only from the local folder and every other package comes from nuget.org.
 
    ```xml
    <?xml version="1.0" encoding="utf-8"?>
@@ -45,16 +71,11 @@ Paketler NuGet.org'da yayınlanmaz, lokal bir klasörden kullanılır.
    </configuration>
    ```
 
-3. Paketleri ekleyin (hangi projeye hangisinin ekleneceği için [Katmanlar](#katmanlar) bölümüne bakın):
+3. Add the packages with `dotnet add package` as shown above.
 
-   ```bash
-   dotnet add package Herald
-   dotnet add package Herald.Abstractions
-   ```
+If you pack again with the same version number, NuGet keeps using the cached package. Increase `Version` in `Directory.Build.props` or run `dotnet nuget locals global-packages --clear`.
 
-Aynı sürüm numarasıyla yeniden paketlerseniz NuGet önbellekteki eski paketi kullanmaya devam eder. Bu durumda `Directory.Build.props` içindeki `Version` değerini artırın veya `dotnet nuget locals global-packages --clear` çalıştırın.
-
-## Kayıt
+## Registration
 
 ```csharp
 using Herald;
@@ -63,18 +84,18 @@ builder.Services.AddHerald(configuration =>
 {
     configuration.RegisterServicesFromAssemblyContaining<CreateOrderCommand>();
     configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
-    configuration.Lifetime = ServiceLifetime.Scoped; // İsteğe bağlı, varsayılan Transient.
+    configuration.Lifetime = ServiceLifetime.Scoped; // Optional. The default is Transient.
 });
 ```
 
-- Verilen assembly'lerdeki abstract ve açık generic olmayan tüm `IRequestHandler<,>`, `IRequestHandler<>` ve `INotificationHandler<>` sınıfları Transient olarak kaydedilir.
-- Bir istek tipinin birden fazla handler'ı varsa `AddHerald` `InvalidOperationException` fırlatır.
-- `IHerald` seçilen ömürle kaydedilir. `ISender` ve `IPublisher` aynı `IHerald` kaydına yönlendirilir.
-- `AddHerald` birden fazla kez çağrılabilir. Daha önce eklenmiş kayıtlar tekrar eklenmez.
+- Every non-abstract, non-open-generic class in the given assemblies that implements `IRequestHandler<,>`, `IRequestHandler<>` or `INotificationHandler<>` is registered as transient.
+- If a request type has more than one handler, `AddHerald` throws `InvalidOperationException`.
+- `IHerald` is registered with the configured lifetime. `ISender` and `IPublisher` resolve the same `IHerald` registration.
+- `AddHerald` can be called more than once. Registrations that already exist are not added again.
 
-## Örnekler
+## Usage
 
-### Dönüş değeri olan istek
+### Request with a response
 
 ```csharp
 public sealed record CreateOrderCommand(string Product, int Quantity) : IRequest<Guid>;
@@ -90,7 +111,7 @@ public sealed class CreateOrderHandler(IOrderRepository orders) : IRequestHandle
 }
 ```
 
-### Dönüş değeri olmayan istek
+### Request without a response
 
 ```csharp
 public sealed record CancelOrderCommand(Guid OrderId) : IRequest;
@@ -102,23 +123,23 @@ public sealed class CancelOrderHandler(IOrderRepository orders) : IRequestHandle
 }
 ```
 
-### İstek gönderme
+### Sending requests
 
 ```csharp
 public sealed class OrderEndpoints(ISender sender)
 {
     public async Task<Guid> Create(CancellationToken cancellationToken)
     {
-        var orderId = await sender.Send(new CreateOrderCommand("Kalem", 3), cancellationToken);
+        var orderId = await sender.Send(new CreateOrderCommand("Pencil", 3), cancellationToken);
         await sender.Send(new CancelOrderCommand(orderId), cancellationToken);
         return orderId;
     }
 }
 ```
 
-Tipi derleme zamanında bilinmeyen istekler için `Send(object)` kullanılır. Dönüşü olmayan isteklerde sonuç `null` olur.
+Use `Send(object)` for requests whose type is not known at compile time. For a request without a response, the result is `null`.
 
-### Bildirim
+### Notifications
 
 ```csharp
 public sealed record OrderCreated(Guid OrderId) : INotification;
@@ -132,9 +153,9 @@ public sealed class SendOrderEmail(IEmailSender email) : INotificationHandler<Or
 await publisher.Publish(new OrderCreated(orderId), cancellationToken);
 ```
 
-Handler'lar kayıt sırasıyla, birbiri ardına çalışır. Bir handler exception fırlatırsa exception çağırana iletilir ve sonraki handler'lar çalışmaz. Handler yoksa `Publish` hiçbir şey yapmaz.
+Handlers run one after another in registration order. If a handler throws, the exception reaches the caller and the remaining handlers do not run. If there is no handler, `Publish` does nothing.
 
-### Pipeline behavior
+### Pipeline behaviors
 
 ```csharp
 public sealed class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TRequest, TResponse>> logger)
@@ -143,38 +164,38 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        logger.LogInformation("{Request} başladı", typeof(TRequest).Name);
+        logger.LogInformation("Handling {Request}", typeof(TRequest).Name);
         var response = await next();
-        logger.LogInformation("{Request} bitti", typeof(TRequest).Name);
+        logger.LogInformation("Handled {Request}", typeof(TRequest).Name);
         return response;
     }
 }
 ```
 
-- Açık generic behavior `AddOpenBehavior(typeof(LoggingBehavior<,>))` ile, tek bir istek tipine özel behavior `AddBehavior<IPipelineBehavior<CreateOrderCommand, Guid>, CreateOrderValidation>()` ile eklenir.
-- Behavior'lar eklenme sırasıyla çalışır. İlk eklenen en dışta, handler en içtedir.
-- Dönüş değeri olmayan istekler behavior'larda `TResponse = Unit` olarak görünür. Handler'lar `Unit` görmez.
-- `next()` parametresiz çağrılırsa behavior'a gelen `cancellationToken` iletilir. `next(token)` verilen token'ı iletir.
+- Add an open generic behavior for all requests with `AddOpenBehavior(typeof(LoggingBehavior<,>))`. Add a behavior for one request type with `AddBehavior<IPipelineBehavior<CreateOrderCommand, Guid>, CreateOrderValidation>()`.
+- Behaviors run in the order they are added. The first one added is outermost; the handler is innermost.
+- Requests without a response appear in behaviors with `TResponse = Unit`. Handlers never see `Unit`.
+- When `next()` is called without arguments, the `cancellationToken` the behavior received is passed on. `next(token)` passes on the given token.
 
-> **Uyarı:** Pipeline behavior'larında `TRequest` için `IRequest<TResponse>` constraint'i kullanmayın; dönüşü olmayan isteklerde behavior sessizce atlanır. `where TRequest : notnull` kullanın.
+> **Warning:** Do not constrain `TRequest` to `IRequest<TResponse>` in pipeline behaviors; the behavior is silently skipped for requests without a response. Use `where TRequest : notnull` instead.
 
-## Katmanlar
+## Layers
 
-| Katman | Referans verdiği paket |
+| Layer | Package reference |
 |---|---|
-| Domain | Hiçbiri |
+| Domain | None |
 | Application | `Herald.Abstractions` |
 | Infrastructure | `Herald.Abstractions` |
 | API (composition root) | `Herald` |
 
-İstekler, handler'lar, bildirimler ve behavior'lar yalnızca sözleşmelere ihtiyaç duyar. `AddHerald` çağrısı yalnızca composition root'ta yapılır. `Herald` paketi `Herald.Abstractions`'ı da getirir.
+Requests, handlers, notifications and behaviors only need the contracts. Call `AddHerald` only in the composition root.
 
-## Mevcut projeye geçiş
+## Moving an existing project to Herald
 
-`IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher` ve `Unit` sözleşmelerini kullanan bir projede:
+In a project that already uses the `IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher` and `Unit` contracts:
 
-1. Önceki mediator paketlerinin referanslarını kaldırıp `Herald` ve `Herald.Abstractions` paketlerini ekleyin.
-2. `global using` satırındaki namespace'i `Herald` yapın ve DI kaydını `AddHerald` ile yapın:
+1. Remove the references to the previous mediator packages and add `Herald` and `Herald.Abstractions`.
+2. Change the namespace in the `global using` line to `Herald` and register the services with `AddHerald`:
 
    ```csharp
    global using Herald;
@@ -182,14 +203,18 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior
    services.AddHerald(configuration => configuration.RegisterServicesFromAssemblyContaining<Program>());
    ```
 
-3. Hem istek gönderen hem bildirim yayınlayan birleşik arayüz olarak `IHerald` kullanın. `ISender` ve `IPublisher` kullanan kod değişmez.
+3. Use `IHerald` where you need one interface that both sends requests and publishes notifications. Code that uses `ISender` and `IPublisher` does not change.
 
-## Kapsam dışı
+## Not included
 
-Herald şunları içermez:
+Herald does not provide:
 
-- Stream istekleri
-- Pre/post processor'lar ve exception handler'lar
-- Bildirimlerin paralel yayını gibi özel yayın stratejileri
+- Stream requests
+- Pre/post processors and exception handlers
+- Custom publishing strategies, such as publishing notifications in parallel
 
-Handler'lar isteğin ve bildirimin tam tipine göre çözümlenir: temel bir bildirim tipine yazılmış handler, türetilmiş bildirimler için çağrılmaz. Açık generic handler'lar taranmaz.
+Handlers are resolved by the exact type of the request or notification: a handler written for a base notification type is not called for derived notifications. Open generic handlers are not scanned.
+
+## License
+
+Herald is licensed under the [MIT License](https://github.com/MuhammedSefaT/Herald/blob/main/LICENSE).

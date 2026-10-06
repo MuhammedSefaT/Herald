@@ -1,30 +1,30 @@
 namespace Herald;
 
 /// <summary>
-/// Bildirimleri kayıtlı tüm handler'lara yayınlar.
+/// Publishes notifications to all registered handlers.
 /// </summary>
 public interface IPublisher
 {
     /// <summary>
-    /// Bildirimi kayıtlı tüm handler'lara sırayla iletir. Handler yoksa hiçbir şey yapmaz.
-    /// Bir handler exception fırlatırsa exception yukarı iletilir ve sonraki handler'lar çalışmaz.
+    /// Publishes the notification to all registered handlers, one after another. Does nothing when there is no handler.
+    /// If a handler throws, the exception is propagated and the remaining handlers do not run.
     /// </summary>
-    /// <typeparam name="TNotification">Bildirim tipi.</typeparam>
-    /// <param name="notification">Yayınlanacak bildirim.</param>
-    /// <param name="cancellationToken">İptal token'ı.</param>
-    /// <returns>Tüm handler'ların tamamlanmasını temsil eden task.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="notification"/> null ise.</exception>
+    /// <typeparam name="TNotification">The type of notification.</typeparam>
+    /// <param name="notification">The notification to publish.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that represents the completion of all handlers.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="notification"/> is null.</exception>
     Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
         where TNotification : INotification;
 
     /// <summary>
-    /// Tipi derleme zamanında bilinmeyen bir bildirimi kayıtlı tüm handler'lara sırayla iletir.
-    /// Handler yoksa hiçbir şey yapmaz.
+    /// Publishes a notification whose type is not known at compile time to all registered handlers, one after another.
+    /// Does nothing when there is no handler.
     /// </summary>
-    /// <param name="notification">Yayınlanacak bildirim. <see cref="INotification"/> uygulamalıdır.</param>
-    /// <param name="cancellationToken">İptal token'ı.</param>
-    /// <returns>Tüm handler'ların tamamlanmasını temsil eden task.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="notification"/> null ise.</exception>
-    /// <exception cref="ArgumentException"><paramref name="notification"/>, <see cref="INotification"/> uygulamıyorsa.</exception>
+    /// <param name="notification">The notification to publish. It must implement <see cref="INotification"/>.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that represents the completion of all handlers.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="notification"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="notification"/> does not implement <see cref="INotification"/>.</exception>
     Task Publish(object notification, CancellationToken cancellationToken = default);
 }

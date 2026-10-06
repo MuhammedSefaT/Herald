@@ -1,7 +1,7 @@
 namespace Herald;
 
 /// <summary>
-/// Yayınlanabilen bir bildirimi işaretler.
-/// Bir bildirimin sıfır veya daha fazla <see cref="INotificationHandler{TNotification}"/> handler'ı olabilir.
+/// Marks a notification that can be published.
+/// A notification can have zero or more <see cref="INotificationHandler{TNotification}"/> handlers.
 /// </summary>
 public interface INotification { }

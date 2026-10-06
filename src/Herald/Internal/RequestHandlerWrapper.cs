@@ -3,17 +3,17 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Herald;
 
 /// <summary>
-/// Request wrapper'larının ortak tabanı. Tipi derleme zamanında bilinmeyen istekler bu tip üzerinden gönderilir.
+/// Common base of the request wrappers. Requests whose type is not known at compile time are sent through this type.
 /// </summary>
 internal abstract class RequestHandlerBase
 {
     /// <summary>
-    /// İsteği işler ve sonucu <see cref="object"/> olarak döndürür; dönüşü olmayan isteklerde <see langword="null"/> döner.
+    /// Handles the request and returns the response as <see cref="object"/>; returns <see langword="null"/> for requests without a response.
     /// </summary>
     public abstract Task<object?> HandleUntyped(object request, IServiceProvider serviceProvider, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Kayıtlı behavior'ları kayıt sırasına göre iç içe çalıştırır: ilk kaydedilen en dışta, handler en içte.
+    /// Runs the registered behaviors nested in registration order: the first registered behavior is outermost, the handler is innermost.
     /// </summary>
     protected static Task<TResponse> RunPipeline<TRequest, TResponse>(
         TRequest request,
@@ -34,7 +34,7 @@ internal abstract class RequestHandlerBase
                 return handler(token);
             }
 
-            // next() parametresiz çağrılırsa default token gelir; bu durumda behavior'ın aldığı token iletilir.
+            // When next() is called without a token, the default token arrives; the token this behavior received is passed on instead.
             return behaviors[index].Handle(
                 request,
                 nextToken => Next(index + 1, nextToken.CanBeCanceled ? nextToken : token),
@@ -48,7 +48,7 @@ internal abstract class RequestHandlerBase
 }
 
 /// <summary>
-/// Dönüş değeri olan istekler için tip güvenli giriş noktası.
+/// Type-safe entry point for requests that return a value.
 /// </summary>
 internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
 {
@@ -56,7 +56,7 @@ internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
 }
 
 /// <summary>
-/// <see cref="IRequestHandler{TRequest, TResponse}"/> handler'ını DI'dan alıp pipeline içinde çalıştırır.
+/// Resolves the <see cref="IRequestHandler{TRequest, TResponse}"/> handler from DI and runs it inside the pipeline.
 /// </summary>
 internal sealed class RequestHandlerWrapper<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
     where TRequest : IRequest<TResponse>

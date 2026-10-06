@@ -2,7 +2,7 @@ using Herald.Tests.Infrastructure;
 
 namespace Herald.Tests.Fixtures;
 
-// Dönüş değeri olan istek.
+// Request that returns a value.
 public sealed record Ping(string Message) : IRequest<Pong>;
 
 public sealed record Pong(string Message);
@@ -16,7 +16,7 @@ public sealed class PingHandler(CallLog log) : IRequestHandler<Ping, Pong>
     }
 }
 
-// Dönüş değeri olmayan istek.
+// Request that does not return a value.
 public sealed record VoidCommand(string Name) : IRequest;
 
 public sealed class VoidCommandHandler(CallLog log) : IRequestHandler<VoidCommand>
@@ -28,18 +28,18 @@ public sealed class VoidCommandHandler(CallLog log) : IRequestHandler<VoidComman
     }
 }
 
-// Handler'ı olmayan istekler.
+// Requests without handlers.
 public sealed record UnhandledRequest : IRequest<string>;
 
 public sealed record UnhandledVoidRequest : IRequest;
 
-// Hem IRequest hem IRequest<TResponse> uygulayan, gönderilemeyen istek.
+// Request that implements both IRequest and IRequest<TResponse> and therefore cannot be sent.
 public sealed record AmbiguousRequest : IRequest, IRequest<string>;
 
-// Handler'ları test sırasında dinamik bir assembly'de üretilen istek.
+// Request whose handlers are generated in a dynamic assembly during the test.
 public sealed record ConflictRequest : IRequest<string>;
 
-// Handler'ı exception fırlatan istekler.
+// Requests whose handlers throw.
 public sealed record ThrowingRequest : IRequest<string>;
 
 public sealed class ThrowingRequestHandler : IRequestHandler<ThrowingRequest, string>
@@ -62,7 +62,7 @@ public sealed class ThrowingVoidRequestHandler : IRequestHandler<ThrowingVoidReq
     }
 }
 
-// Handler'a ulaşan token'ı kaydeden istekler.
+// Requests whose handlers record the token they receive.
 public sealed record TokenProbe : IRequest<string>;
 
 public sealed class TokenProbeHandler(TokenRecorder recorder) : IRequestHandler<TokenProbe, string>
@@ -85,7 +85,7 @@ public sealed class VoidTokenProbeHandler(TokenRecorder recorder) : IRequestHand
     }
 }
 
-// Birden fazla handler arayüzü uygulayan tek sınıf.
+// A single class that implements several handler interfaces.
 public sealed record MultiRequest : IRequest<string>;
 
 public sealed record MultiVoidRequest : IRequest;
@@ -113,7 +113,7 @@ public sealed class MultiHandler(CallLog log) :
     }
 }
 
-// Açık generic handler taranmamalıdır.
+// An open generic handler must not be scanned.
 public sealed record GenericRequest<T>(T Value) : IRequest<string>;
 
 public sealed class GenericRequestHandler<T> : IRequestHandler<GenericRequest<T>, string>
@@ -122,7 +122,7 @@ public sealed class GenericRequestHandler<T> : IRequestHandler<GenericRequest<T>
         Task.FromResult($"{request.Value}");
 }
 
-// Abstract handler taranmamalı, ondan türeyen somut handler taranmalıdır.
+// An abstract handler must not be scanned; the concrete handler derived from it must be.
 public sealed record InheritedRequest : IRequest<string>;
 
 public abstract class InheritedRequestHandlerBase : IRequestHandler<InheritedRequest, string>
@@ -136,7 +136,7 @@ public sealed class InheritedRequestHandler : InheritedRequestHandlerBase
         Task.FromResult("derived");
 }
 
-// Önbellek testleri için yalnızca o testlerde kullanılan istekler.
+// Requests used only by the cache tests.
 public sealed record ParallelRequest(int Value) : IRequest<int>;
 
 public sealed class ParallelRequestHandler : IRequestHandler<ParallelRequest, int>

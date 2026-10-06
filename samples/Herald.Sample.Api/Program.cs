@@ -4,8 +4,8 @@ using Herald.Sample.Api.Products;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Herald kaydı: bu assembly'deki tüm request ve notification handler'ları taranır,
-// açık generic logging behavior'ı tüm isteklerin pipeline'ına eklenir.
+// Register Herald: every request and notification handler in this assembly is scanned,
+// and the open generic logging behavior is added to the pipeline of every request.
 builder.Services.AddHerald(configuration =>
 {
     configuration.RegisterServicesFromAssemblyContaining<Program>();
@@ -16,7 +16,7 @@ builder.Services.AddSingleton<ProductStore>();
 
 var app = builder.Build();
 
-// Endpoint'ler sadece ISender'a bağımlıdır; iş mantığı handler'lardadır.
+// Endpoints depend only on ISender; the business logic lives in the handlers.
 app.MapPost("/products", async (CreateProductCommand command, ISender sender, CancellationToken cancellationToken) =>
 {
     var id = await sender.Send(command, cancellationToken);

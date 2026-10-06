@@ -1,16 +1,16 @@
 namespace Herald;
 
 /// <summary>
-/// Bir bildirimi işleyen handler. Aynı bildirim için birden fazla handler bulunabilir.
+/// Handles a notification. A notification can have more than one handler.
 /// </summary>
-/// <typeparam name="TNotification">İşlenen bildirim tipi.</typeparam>
+/// <typeparam name="TNotification">The type of notification being handled.</typeparam>
 public interface INotificationHandler<in TNotification> where TNotification : INotification
 {
     /// <summary>
-    /// Bildirimi işler.
+    /// Handles the notification.
     /// </summary>
-    /// <param name="notification">İşlenecek bildirim.</param>
-    /// <param name="cancellationToken">İptal token'ı.</param>
-    /// <returns>İşlemin tamamlanmasını temsil eden task.</returns>
+    /// <param name="notification">The notification to handle.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that represents the operation.</returns>
     Task Handle(TNotification notification, CancellationToken cancellationToken);
 }

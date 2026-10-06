@@ -1,6 +1,6 @@
 namespace Herald;
 
 /// <summary>
-/// İstek gönderme (<see cref="ISender"/>) ve bildirim yayınlama (<see cref="IPublisher"/>) işlemlerini bir arada sunar.
+/// Combines sending requests (<see cref="ISender"/>) and publishing notifications (<see cref="IPublisher"/>).
 /// </summary>
 public interface IHerald : ISender, IPublisher { }

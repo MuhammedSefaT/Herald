@@ -3,12 +3,12 @@ using System.Collections.Concurrent;
 namespace Herald;
 
 /// <summary>
-/// <see cref="IHerald"/> arayüzünün varsayılan uygulaması. Handler ve behavior'ları
-/// constructor'da verilen <see cref="IServiceProvider"/> üzerinden çözümler.
+/// Default implementation of <see cref="IHerald"/>. Resolves handlers and behaviors from the
+/// <see cref="IServiceProvider"/> passed to the constructor.
 /// </summary>
 /// <remarks>
-/// Her istek ve bildirim tipi için gerekli wrapper ilk kullanımda bir kez oluşturulur ve
-/// sonraki çağrılarda önbellekten kullanılır; çağrı başına reflection yapılmaz.
+/// The wrapper for each request and notification type is created once on first use and
+/// reused from a cache afterwards; no reflection runs per call.
 /// </remarks>
 internal sealed class HeraldDispatcher : IHerald
 {
@@ -18,10 +18,10 @@ internal sealed class HeraldDispatcher : IHerald
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
-    /// Yeni bir <see cref="HeraldDispatcher"/> örneği oluşturur.
+    /// Creates a new <see cref="HeraldDispatcher"/>.
     /// </summary>
-    /// <param name="serviceProvider">Handler ve behavior'ların çözümleneceği servis sağlayıcı.</param>
-    /// <exception cref="ArgumentNullException"><paramref name="serviceProvider"/> null ise.</exception>
+    /// <param name="serviceProvider">The service provider that resolves handlers and behaviors.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="serviceProvider"/> is null.</exception>
     public HeraldDispatcher(IServiceProvider serviceProvider)
     {
         ArgumentNullException.ThrowIfNull(serviceProvider);
@@ -35,8 +35,8 @@ internal sealed class HeraldDispatcher : IHerald
 
         var wrapper = GetRequestHandler(request.GetType());
 
-        // IRequest<out TResponse> kovaryant olduğu için TResponse, isteğin gerçek dönüş tipinin
-        // bir üst tipi olabilir (ör. IRequest<string> isteğinin IRequest<object> olarak gönderilmesi).
+        // IRequest<out TResponse> is covariant, so TResponse can be a base type of the request's real
+        // response type (for example, an IRequest<string> request sent as IRequest<object>).
         return wrapper is RequestHandlerWrapper<TResponse> typedWrapper
             ? typedWrapper.Handle(request, _serviceProvider, cancellationToken)
             : SendAsBaseResponse<TResponse>(wrapper, request, cancellationToken);

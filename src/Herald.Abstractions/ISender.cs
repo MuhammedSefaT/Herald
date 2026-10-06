@@ -1,42 +1,42 @@
 namespace Herald;
 
 /// <summary>
-/// İstekleri pipeline behavior'lardan geçirerek tek bir handler'a gönderir.
+/// Sends requests to a single handler through the pipeline behaviors.
 /// </summary>
 public interface ISender
 {
     /// <summary>
-    /// Dönüş değeri olan bir isteği gönderir.
+    /// Sends a request that returns a value.
     /// </summary>
-    /// <typeparam name="TResponse">İsteğin dönüş tipi.</typeparam>
-    /// <param name="request">Gönderilecek istek.</param>
-    /// <param name="cancellationToken">İptal token'ı.</param>
-    /// <returns>Handler'ın döndürdüğü sonuç.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="request"/> null ise.</exception>
-    /// <exception cref="InvalidOperationException">İstek için kayıtlı bir handler yoksa.</exception>
+    /// <typeparam name="TResponse">The type of the response.</typeparam>
+    /// <param name="request">The request to send.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The response returned by the handler.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="request"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">No handler is registered for the request.</exception>
     Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Dönüş değeri olmayan bir isteği gönderir.
+    /// Sends a request that does not return a value.
     /// </summary>
-    /// <typeparam name="TRequest">İstek tipi.</typeparam>
-    /// <param name="request">Gönderilecek istek.</param>
-    /// <param name="cancellationToken">İptal token'ı.</param>
-    /// <returns>İşlemin tamamlanmasını temsil eden task.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="request"/> null ise.</exception>
-    /// <exception cref="InvalidOperationException">İstek için kayıtlı bir handler yoksa.</exception>
+    /// <typeparam name="TRequest">The type of request.</typeparam>
+    /// <param name="request">The request to send.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that represents the operation.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="request"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">No handler is registered for the request.</exception>
     Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest;
 
     /// <summary>
-    /// Tipi derleme zamanında bilinmeyen bir isteği gönderir.
+    /// Sends a request whose type is not known at compile time.
     /// </summary>
     /// <param name="request">
-    /// Gönderilecek istek. <see cref="IRequest"/> veya <see cref="IRequest{TResponse}"/> uygulamalıdır.
+    /// The request to send. It must implement <see cref="IRequest"/> or <see cref="IRequest{TResponse}"/>.
     /// </param>
-    /// <param name="cancellationToken">İptal token'ı.</param>
-    /// <returns>Handler'ın döndürdüğü sonuç; dönüş değeri olmayan isteklerde <see langword="null"/>.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="request"/> null ise.</exception>
-    /// <exception cref="ArgumentException"><paramref name="request"/>, <see cref="IBaseRequest"/> uygulamıyorsa.</exception>
-    /// <exception cref="InvalidOperationException">İstek için kayıtlı bir handler yoksa.</exception>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The response returned by the handler, or <see langword="null"/> for a request that does not return a value.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="request"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="request"/> does not implement <see cref="IBaseRequest"/>.</exception>
+    /// <exception cref="InvalidOperationException">No handler is registered for the request.</exception>
     Task<object?> Send(object request, CancellationToken cancellationToken = default);
 }

@@ -7,7 +7,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
-    <Description>.NET uygulamaları için hafif bir mediator kütüphanesi. İstek/handler, bildirim ve pipeline behavior desteği sunar; Microsoft.Extensions.DependencyInjection üzerinden AddHerald ile kaydedilir.</Description>
+    <Description>A lightweight mediator library for .NET with requests and handlers, notifications and pipeline behaviors. Register it with AddHerald on Microsoft.Extensions.DependencyInjection.</Description>
     <PackageTags>mediator;cqrs;request;notification;pipeline</PackageTags>
   </PropertyGroup>
 

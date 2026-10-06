@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Herald;
 
 /// <summary>
-/// <see cref="ServiceCollectionExtensions.AddHerald"/> yapılandırması: taranacak assembly'ler,
-/// pipeline behavior'ları ve <see cref="IHerald"/> kaydının ömrü.
+/// Configuration for <see cref="ServiceCollectionExtensions.AddHerald"/>: the assemblies to scan,
+/// the pipeline behaviors and the lifetime of the <see cref="IHerald"/> registration.
 /// </summary>
 public sealed class HeraldConfiguration
 {
@@ -13,8 +13,9 @@ public sealed class HeraldConfiguration
     private readonly List<ServiceDescriptor> _behaviors = [];
 
     /// <summary>
-    /// <see cref="IHerald"/> kaydının ömrü. <see cref="ISender"/> ve <see cref="IPublisher"/> aynı ömürle
-    /// <see cref="IHerald"/> kaydına yönlendirilir. Varsayılan değer <see cref="ServiceLifetime.Transient"/>.
+    /// The lifetime of the <see cref="IHerald"/> registration. <see cref="ISender"/> and <see cref="IPublisher"/>
+    /// are forwarded to the <see cref="IHerald"/> registration with the same lifetime. The default is
+    /// <see cref="ServiceLifetime.Transient"/>.
     /// </summary>
     public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
 
@@ -23,11 +24,11 @@ public sealed class HeraldConfiguration
     internal IReadOnlyList<ServiceDescriptor> Behaviors => _behaviors;
 
     /// <summary>
-    /// Handler'ları taranacak bir assembly ekler. Aynı assembly birden fazla kez eklenirse bir kez taranır.
+    /// Adds an assembly to scan for handlers. An assembly that is added more than once is scanned once.
     /// </summary>
-    /// <param name="assembly">Taranacak assembly.</param>
-    /// <returns>Zincirleme çağrı için aynı yapılandırma.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="assembly"/> null ise.</exception>
+    /// <param name="assembly">The assembly to scan.</param>
+    /// <returns>The same configuration, for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="assembly"/> is null.</exception>
     public HeraldConfiguration RegisterServicesFromAssembly(Assembly assembly)
     {
         ArgumentNullException.ThrowIfNull(assembly);
@@ -41,11 +42,11 @@ public sealed class HeraldConfiguration
     }
 
     /// <summary>
-    /// Handler'ları taranacak birden fazla assembly ekler.
+    /// Adds several assemblies to scan for handlers.
     /// </summary>
-    /// <param name="assemblies">Taranacak assembly'ler.</param>
-    /// <returns>Zincirleme çağrı için aynı yapılandırma.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="assemblies"/> veya elemanlarından biri null ise.</exception>
+    /// <param name="assemblies">The assemblies to scan.</param>
+    /// <returns>The same configuration, for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="assemblies"/> or one of its elements is null.</exception>
     public HeraldConfiguration RegisterServicesFromAssemblies(params Assembly[] assemblies)
     {
         ArgumentNullException.ThrowIfNull(assemblies);
@@ -59,38 +60,38 @@ public sealed class HeraldConfiguration
     }
 
     /// <summary>
-    /// <typeparamref name="T"/> tipinin bulunduğu assembly'yi taranacak assembly'lere ekler.
+    /// Adds the assembly that contains <typeparamref name="T"/> to the assemblies to scan.
     /// </summary>
-    /// <typeparam name="T">Assembly'si taranacak herhangi bir tip.</typeparam>
-    /// <returns>Zincirleme çağrı için aynı yapılandırma.</returns>
+    /// <typeparam name="T">Any type in the assembly to scan.</typeparam>
+    /// <returns>The same configuration, for chaining.</returns>
     public HeraldConfiguration RegisterServicesFromAssemblyContaining<T>() =>
         RegisterServicesFromAssembly(typeof(T).Assembly);
 
     /// <summary>
-    /// Kapalı bir pipeline behavior ekler. Behavior'lar eklenme sırasıyla çalışır: ilk eklenen en dışta.
+    /// Adds a closed pipeline behavior. Behaviors run in the order they are added: the first one added is outermost.
     /// </summary>
-    /// <typeparam name="TService">Servis tipi, ör. <c>IPipelineBehavior&lt;CreateOrder, Guid&gt;</c>.</typeparam>
-    /// <typeparam name="TImplementation">Behavior sınıfı.</typeparam>
-    /// <param name="lifetime">Behavior kaydının ömrü.</param>
-    /// <returns>Zincirleme çağrı için aynı yapılandırma.</returns>
-    /// <exception cref="ArgumentException"><typeparamref name="TService"/> bir <see cref="IPipelineBehavior{TRequest, TResponse}"/> değilse.</exception>
+    /// <typeparam name="TService">The service type, for example <c>IPipelineBehavior&lt;CreateOrder, Guid&gt;</c>.</typeparam>
+    /// <typeparam name="TImplementation">The behavior class.</typeparam>
+    /// <param name="lifetime">The lifetime of the behavior registration.</param>
+    /// <returns>The same configuration, for chaining.</returns>
+    /// <exception cref="ArgumentException"><typeparamref name="TService"/> is not an <see cref="IPipelineBehavior{TRequest, TResponse}"/>.</exception>
     public HeraldConfiguration AddBehavior<TService, TImplementation>(ServiceLifetime lifetime = ServiceLifetime.Transient)
         where TService : class
         where TImplementation : class, TService =>
         AddBehavior(typeof(TService), typeof(TImplementation), lifetime);
 
     /// <summary>
-    /// Bir pipeline behavior ekler. Behavior'lar eklenme sırasıyla çalışır: ilk eklenen en dışta.
+    /// Adds a pipeline behavior. Behaviors run in the order they are added: the first one added is outermost.
     /// </summary>
-    /// <param name="serviceType">Servis tipi, ör. <c>typeof(IPipelineBehavior&lt;CreateOrder, Guid&gt;)</c>.</param>
-    /// <param name="implementationType">Behavior sınıfı.</param>
-    /// <param name="lifetime">Behavior kaydının ömrü.</param>
-    /// <returns>Zincirleme çağrı için aynı yapılandırma.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="serviceType"/> veya <paramref name="implementationType"/> null ise.</exception>
+    /// <param name="serviceType">The service type, for example <c>typeof(IPipelineBehavior&lt;CreateOrder, Guid&gt;)</c>.</param>
+    /// <param name="implementationType">The behavior class.</param>
+    /// <param name="lifetime">The lifetime of the behavior registration.</param>
+    /// <returns>The same configuration, for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="serviceType"/> or <paramref name="implementationType"/> is null.</exception>
     /// <exception cref="ArgumentException">
-    /// <paramref name="serviceType"/> bir <see cref="IPipelineBehavior{TRequest, TResponse}"/> değilse veya
-    /// <paramref name="implementationType"/> <paramref name="serviceType"/> tipini uygulamıyorsa. Açık generic
-    /// <c>IPipelineBehavior&lt;,&gt;</c> servis tipi için implementasyon da açık generic olmalıdır.
+    /// <paramref name="serviceType"/> is not an <see cref="IPipelineBehavior{TRequest, TResponse}"/>, or
+    /// <paramref name="implementationType"/> does not implement <paramref name="serviceType"/>. For the open generic
+    /// <c>IPipelineBehavior&lt;,&gt;</c> service type, the implementation must also be an open generic type.
     /// </exception>
     public HeraldConfiguration AddBehavior(Type serviceType, Type implementationType, ServiceLifetime lifetime = ServiceLifetime.Transient)
     {
@@ -120,16 +121,16 @@ public sealed class HeraldConfiguration
     }
 
     /// <summary>
-    /// Tüm istekler için çalışacak açık generic bir pipeline behavior ekler, ör. <c>typeof(LoggingBehavior&lt;,&gt;)</c>.
-    /// Behavior'lar eklenme sırasıyla çalışır: ilk eklenen en dışta.
+    /// Adds an open generic pipeline behavior that runs for all requests, for example <c>typeof(LoggingBehavior&lt;,&gt;)</c>.
+    /// Behaviors run in the order they are added: the first one added is outermost.
     /// </summary>
-    /// <param name="openBehaviorType"><see cref="IPipelineBehavior{TRequest, TResponse}"/> uygulayan açık generic tip.</param>
-    /// <param name="lifetime">Behavior kaydının ömrü.</param>
-    /// <returns>Zincirleme çağrı için aynı yapılandırma.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="openBehaviorType"/> null ise.</exception>
+    /// <param name="openBehaviorType">An open generic type that implements <see cref="IPipelineBehavior{TRequest, TResponse}"/>.</param>
+    /// <param name="lifetime">The lifetime of the behavior registration.</param>
+    /// <returns>The same configuration, for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="openBehaviorType"/> is null.</exception>
     /// <exception cref="ArgumentException">
-    /// <paramref name="openBehaviorType"/> açık generic bir tip değilse veya
-    /// <see cref="IPipelineBehavior{TRequest, TResponse}"/> uygulamıyorsa.
+    /// <paramref name="openBehaviorType"/> is not an open generic type or does not implement
+    /// <see cref="IPipelineBehavior{TRequest, TResponse}"/>.
     /// </exception>
     public HeraldConfiguration AddOpenBehavior(Type openBehaviorType, ServiceLifetime lifetime = ServiceLifetime.Transient)
     {

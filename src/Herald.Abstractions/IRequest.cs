@@ -1,14 +1,14 @@
 namespace Herald;
 
 /// <summary>
-/// Dönüş değeri olmayan bir isteği işaretler.
-/// İsteği işleyen sınıf <see cref="IRequestHandler{TRequest}"/> arayüzünü uygular.
+/// Marks a request that does not return a value.
+/// The class that handles the request implements <see cref="IRequestHandler{TRequest}"/>.
 /// </summary>
 public interface IRequest : IBaseRequest { }
 
 /// <summary>
-/// <typeparamref name="TResponse"/> tipinde değer döndüren bir isteği işaretler.
-/// İsteği işleyen sınıf <see cref="IRequestHandler{TRequest, TResponse}"/> arayüzünü uygular.
+/// Marks a request that returns a value of type <typeparamref name="TResponse"/>.
+/// The class that handles the request implements <see cref="IRequestHandler{TRequest, TResponse}"/>.
 /// </summary>
-/// <typeparam name="TResponse">İsteğin dönüş tipi.</typeparam>
+/// <typeparam name="TResponse">The type of the response.</typeparam>
 public interface IRequest<out TResponse> : IBaseRequest { }

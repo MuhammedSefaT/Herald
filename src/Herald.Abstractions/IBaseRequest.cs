@@ -1,7 +1,7 @@
 namespace Herald;
 
 /// <summary>
-/// Tüm istekler için ortak işaretleyici arayüz.
-/// Doğrudan uygulanmaz; bunun yerine <see cref="IRequest"/> veya <see cref="IRequest{TResponse}"/> kullanılır.
+/// Common marker interface for all requests.
+/// Do not implement it directly; implement <see cref="IRequest"/> or <see cref="IRequest{TResponse}"/> instead.
 /// </summary>
 public interface IBaseRequest { }

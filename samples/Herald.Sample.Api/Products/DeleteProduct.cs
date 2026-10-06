@@ -2,7 +2,7 @@ using Herald;
 
 namespace Herald.Sample.Api.Products;
 
-// Dönüş değeri olmayan command. Handler IRequestHandler<TRequest> uygular ve Unit görmez.
+// Command that does not return a value. The handler implements IRequestHandler<TRequest> and never sees Unit.
 public sealed record DeleteProductCommand(Guid Id) : IRequest;
 
 public sealed class DeleteProductHandler(ProductStore store, ILogger<DeleteProductHandler> logger)
@@ -12,7 +12,7 @@ public sealed class DeleteProductHandler(ProductStore store, ILogger<DeleteProdu
     {
         if (store.Remove(request.Id))
         {
-            logger.LogInformation("Ürün silindi: {ProductId}", request.Id);
+            logger.LogInformation("Deleted product {ProductId}", request.Id);
         }
 
         return Task.CompletedTask;

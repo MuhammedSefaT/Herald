@@ -2,7 +2,7 @@ using Herald;
 
 namespace Herald.Sample.Api.Products;
 
-// Query: ürün bulunamazsa null döner.
+// Query: returns null when the product is not found.
 public sealed record GetProductQuery(Guid Id) : IRequest<Product?>;
 
 public sealed class GetProductHandler(ProductStore store) : IRequestHandler<GetProductQuery, Product?>

@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Herald;
 
 /// <summary>
-/// Notification wrapper'larının ortak tabanı.
+/// Common base of the notification wrappers.
 /// </summary>
 internal abstract class NotificationHandlerWrapper
 {
@@ -11,7 +11,7 @@ internal abstract class NotificationHandlerWrapper
 }
 
 /// <summary>
-/// Tüm <see cref="INotificationHandler{TNotification}"/> kayıtlarını DI'dan alır ve kayıt sırasıyla tek tek bekler.
+/// Resolves all <see cref="INotificationHandler{TNotification}"/> registrations from DI and awaits them one by one in registration order.
 /// </summary>
 internal sealed class NotificationHandlerWrapper<TNotification> : NotificationHandlerWrapper
     where TNotification : INotification

@@ -2,7 +2,7 @@ using Herald.Tests.Infrastructure;
 
 namespace Herald.Tests.Fixtures;
 
-// Sıra testleri için Ping'e özel kapalı behavior'lar.
+// Closed behaviors for Ping, used by the ordering tests.
 public sealed class OuterPingBehavior(CallLog log) : IPipelineBehavior<Ping, Pong>
 {
     public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, CancellationToken cancellationToken)
@@ -25,7 +25,7 @@ public sealed class InnerPingBehavior(CallLog log) : IPipelineBehavior<Ping, Pon
     }
 }
 
-// Tüm istekler için çalışan açık generic behavior'lar.
+// Open generic behaviors that run for every request.
 public sealed class MiddleOpenBehavior<TRequest, TResponse>(CallLog log) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
@@ -48,7 +48,7 @@ public sealed class RecordingOpenBehavior<TRequest, TResponse>(CallLog log) : IP
     }
 }
 
-// Token testleri için behavior'lar.
+// Behaviors for the cancellation token tests.
 public sealed class ParameterlessNextBehavior<TRequest, TResponse>(TokenRecorder recorder) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {

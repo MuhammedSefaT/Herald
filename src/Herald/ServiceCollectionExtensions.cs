@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Herald;
 
 /// <summary>
-/// Herald servislerini <see cref="IServiceCollection"/> üzerine kaydeden extension metotları.
+/// Extension methods that register Herald services on an <see cref="IServiceCollection"/>.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
@@ -17,25 +17,26 @@ public static class ServiceCollectionExtensions
     ];
 
     /// <summary>
-    /// Herald'ı kaydeder: verilen assembly'lerdeki handler'ları tarar, yapılandırmadaki behavior'ları ekler ve
-    /// <see cref="IHerald"/>, <see cref="ISender"/>, <see cref="IPublisher"/> servislerini kaydeder.
+    /// Registers Herald: scans the configured assemblies for handlers, adds the configured behaviors and
+    /// registers <see cref="IHerald"/>, <see cref="ISender"/> and <see cref="IPublisher"/>.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Abstract ve açık generic olmayan, <see cref="IRequestHandler{TRequest, TResponse}"/>,
-    /// <see cref="IRequestHandler{TRequest}"/> veya <see cref="INotificationHandler{TNotification}"/> uygulayan
-    /// tüm sınıflar Transient olarak kaydedilir. Bir sınıf birden fazla handler arayüzü uyguluyorsa hepsi kaydedilir.
+    /// Every non-abstract, non-open-generic class that implements <see cref="IRequestHandler{TRequest, TResponse}"/>,
+    /// <see cref="IRequestHandler{TRequest}"/> or <see cref="INotificationHandler{TNotification}"/> is registered as
+    /// transient. A class that implements several handler interfaces is registered for each of them.
     /// </para>
     /// <para>
-    /// Metot birden fazla kez çağrılabilir; daha önce kaydedilmiş handler, behavior ve <see cref="IHerald"/> kayıtları tekrar eklenmez.
+    /// The method can be called more than once; handler, behavior and <see cref="IHerald"/> registrations that
+    /// already exist are not added again.
     /// </para>
     /// </remarks>
-    /// <param name="services">Servis koleksiyonu.</param>
-    /// <param name="configuration">Herald yapılandırması.</param>
-    /// <returns>Zincirleme çağrı için aynı servis koleksiyonu.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="services"/> veya <paramref name="configuration"/> null ise.</exception>
-    /// <exception cref="ArgumentException">Yapılandırmada hiç assembly kaydedilmemişse.</exception>
-    /// <exception cref="InvalidOperationException">Aynı istek tipi için birden fazla handler bulunursa.</exception>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The Herald configuration.</param>
+    /// <returns>The same service collection, for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="services"/> or <paramref name="configuration"/> is null.</exception>
+    /// <exception cref="ArgumentException">No assembly is configured for scanning.</exception>
+    /// <exception cref="InvalidOperationException">More than one handler is found for the same request type.</exception>
     public static IServiceCollection AddHerald(this IServiceCollection services, Action<HeraldConfiguration> configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -88,7 +89,7 @@ public static class ServiceCollectionExtensions
          select (serviceType, type)).ToList();
 
     /// <summary>
-    /// Assembly'deki tipleri döndürür. Bazı tipler yüklenemiyorsa yalnızca yüklenebilenlerle devam eder.
+    /// Returns the types in the assembly. When some types cannot be loaded, continues with the types that can.
     /// </summary>
     private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
     {
@@ -103,8 +104,8 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Request handler'larını mevcut kayıtlarla birlikte kontrol eder ve henüz kaydedilmemiş olanları döndürür.
-    /// Aynı istek tipi için birden fazla farklı handler varsa hiçbir kayıt yapmadan exception fırlatır.
+    /// Checks the request handlers against the existing registrations and returns the ones that are not registered yet.
+    /// Throws without registering anything when a request type has more than one distinct handler.
     /// </summary>
     private static List<ServiceDescriptor> GetNewRequestHandlers(
         IServiceCollection services,
