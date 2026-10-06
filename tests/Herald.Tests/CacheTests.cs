@@ -10,13 +10,13 @@ public sealed class CacheTests
     public async Task Send_SameRequestTypeRepeatedly_ReturnsCorrectResults()
     {
         using var provider = TestHost.Build();
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
         for (var i = 0; i < 5; i++)
         {
-            Assert.Equal(new Pong($"{i} pong"), await mediator.Send(new Ping($"{i}")));
-            Assert.Equal(new Pong($"{i} pong"), await mediator.Send((object)new Ping($"{i}")));
-            await mediator.Send(new VoidCommand($"{i}"));
+            Assert.Equal(new Pong($"{i} pong"), await herald.Send(new Ping($"{i}")));
+            Assert.Equal(new Pong($"{i} pong"), await herald.Send((object)new Ping($"{i}")));
+            await herald.Send(new VoidCommand($"{i}"));
         }
 
         Assert.Equal(5, provider.GetRequiredService<CallLog>().Entries.Count(entry => entry.StartsWith("handler:VoidCommand:", StringComparison.Ordinal)));
@@ -33,21 +33,21 @@ public sealed class CacheTests
             .Select(value => Task.Run(async () =>
             {
                 await start.Task;
-                var mediator = provider.GetRequiredService<IMediator>();
+                var herald = provider.GetRequiredService<IHerald>();
 
                 switch (value % 4)
                 {
                     case 0:
-                        Assert.Equal(value * 2, await mediator.Send(new ParallelRequest(value)));
+                        Assert.Equal(value * 2, await herald.Send(new ParallelRequest(value)));
                         break;
                     case 1:
-                        Assert.Equal(value * 2, await mediator.Send((object)new ParallelRequest(value)));
+                        Assert.Equal(value * 2, await herald.Send((object)new ParallelRequest(value)));
                         break;
                     case 2:
-                        await mediator.Send(new ParallelVoidRequest(value));
+                        await herald.Send(new ParallelVoidRequest(value));
                         break;
                     default:
-                        await mediator.Publish(new ParallelNotification(value));
+                        await herald.Publish(new ParallelNotification(value));
                         break;
                 }
             }))
@@ -67,8 +67,8 @@ public sealed class CacheTests
         using var withBehavior = TestHost.Build(configuration => configuration.AddOpenBehavior(typeof(RecordingOpenBehavior<,>)));
         using var withoutBehavior = TestHost.Build();
 
-        Assert.Equal("isolated", await withBehavior.GetRequiredService<IMediator>().Send(new CacheIsolationRequest()));
-        Assert.Equal("isolated", await withoutBehavior.GetRequiredService<IMediator>().Send(new CacheIsolationRequest()));
+        Assert.Equal("isolated", await withBehavior.GetRequiredService<IHerald>().Send(new CacheIsolationRequest()));
+        Assert.Equal("isolated", await withoutBehavior.GetRequiredService<IHerald>().Send(new CacheIsolationRequest()));
 
         Assert.Equal("behavior:CacheIsolationRequest:String", Assert.Single(withBehavior.GetRequiredService<CallLog>().Entries));
         Assert.Empty(withoutBehavior.GetRequiredService<CallLog>().Entries);

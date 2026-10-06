@@ -10,10 +10,10 @@ public sealed class NotificationTests
     public async Task Publish_MultipleHandlers_RunOneAfterAnotherInRegistrationOrder()
     {
         using var provider = TestHost.Build();
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
         var order = GetHandlerNamesInRegistrationOrder(provider);
 
-        await mediator.Publish(new OrderPlaced());
+        await herald.Publish(new OrderPlaced());
 
         Assert.Equal(
             new[] { $"{order[0]}:start", $"{order[0]}:end", $"{order[1]}:start", $"{order[1]}:end" },
@@ -24,10 +24,10 @@ public sealed class NotificationTests
     public async Task Publish_NoHandlers_DoesNothing()
     {
         using var provider = TestHost.Build();
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        await mediator.Publish(new NobodyListens());
-        await mediator.Publish((object)new NobodyListens());
+        await herald.Publish(new NobodyListens());
+        await herald.Publish((object)new NobodyListens());
 
         Assert.Empty(provider.GetRequiredService<CallLog>().Entries);
     }
@@ -36,10 +36,10 @@ public sealed class NotificationTests
     public async Task Publish_HandlerThrows_ExceptionPropagatesAndLaterHandlersDoNotRun()
     {
         using var provider = TestHost.Build();
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
         var order = GetHandlerNamesInRegistrationOrder(provider);
 
-        var exception = await Assert.ThrowsAsync<TestException>(() => mediator.Publish(new OrderPlaced(ThrowFrom: order[0])));
+        var exception = await Assert.ThrowsAsync<TestException>(() => herald.Publish(new OrderPlaced(ThrowFrom: order[0])));
 
         Assert.Equal(order[0], exception.Message);
         Assert.Equal($"{order[0]}:start", Assert.Single(provider.GetRequiredService<CallLog>().Entries));
@@ -49,10 +49,10 @@ public sealed class NotificationTests
     public async Task PublishObject_Notification_RunsAllHandlers()
     {
         using var provider = TestHost.Build();
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
         object notification = new OrderPlaced();
 
-        await mediator.Publish(notification);
+        await herald.Publish(notification);
 
         Assert.Equal(4, provider.GetRequiredService<CallLog>().Entries.Count);
     }
@@ -61,9 +61,9 @@ public sealed class NotificationTests
     public async Task PublishObject_NullNotification_ThrowsArgumentNullException()
     {
         using var provider = TestHost.Build();
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => mediator.Publish((object)null!));
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => herald.Publish((object)null!));
 
         Assert.Equal("notification", exception.ParamName);
     }
@@ -72,9 +72,9 @@ public sealed class NotificationTests
     public async Task PublishObject_ObjectThatIsNotNotification_ThrowsArgumentException()
     {
         using var provider = TestHost.Build();
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => mediator.Publish((object)new Ping("not a notification")));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => herald.Publish((object)new Ping("not a notification")));
 
         Assert.Equal("notification", exception.ParamName);
         Assert.Contains(typeof(Ping).FullName!, exception.Message);
@@ -84,9 +84,9 @@ public sealed class NotificationTests
     public async Task Publish_NullNotification_ThrowsArgumentNullException()
     {
         using var provider = TestHost.Build();
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        await Assert.ThrowsAsync<ArgumentNullException>(() => mediator.Publish((OrderPlaced)null!));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => herald.Publish((OrderPlaced)null!));
     }
 
     private static string[] GetHandlerNamesInRegistrationOrder(IServiceProvider provider)

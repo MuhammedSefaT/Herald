@@ -9,13 +9,13 @@ namespace Herald.Tests;
 public sealed class RegistrationTests
 {
     [Fact]
-    public void Resolve_MediatorSenderAndPublisher_AreAvailable()
+    public void Resolve_HeraldSenderAndPublisher_AreAvailable()
     {
         using var provider = TestHost.Build();
 
-        Assert.IsType<Mediator>(provider.GetRequiredService<IMediator>());
-        Assert.IsType<Mediator>(provider.GetRequiredService<ISender>());
-        Assert.IsType<Mediator>(provider.GetRequiredService<IPublisher>());
+        Assert.IsType<HeraldDispatcher>(provider.GetRequiredService<IHerald>());
+        Assert.IsType<HeraldDispatcher>(provider.GetRequiredService<ISender>());
+        Assert.IsType<HeraldDispatcher>(provider.GetRequiredService<IPublisher>());
     }
 
     [Fact]
@@ -24,38 +24,38 @@ public sealed class RegistrationTests
         var services = TestHost.CreateServices();
         using var provider = TestHost.BuildProvider(services);
 
-        Assert.Equal(ServiceLifetime.Transient, services.Single(descriptor => descriptor.ServiceType == typeof(IMediator)).Lifetime);
-        Assert.NotSame(provider.GetRequiredService<IMediator>(), provider.GetRequiredService<IMediator>());
+        Assert.Equal(ServiceLifetime.Transient, services.Single(descriptor => descriptor.ServiceType == typeof(IHerald)).Lifetime);
+        Assert.NotSame(provider.GetRequiredService<IHerald>(), provider.GetRequiredService<IHerald>());
     }
 
     [Fact]
-    public void ScopedLifetime_SenderAndPublisherResolveSameMediatorWithinScope()
+    public void ScopedLifetime_SenderAndPublisherResolveSameHeraldWithinScope()
     {
         var services = TestHost.CreateServices(configuration => configuration.Lifetime = ServiceLifetime.Scoped);
         using var provider = TestHost.BuildProvider(services);
         using var firstScope = provider.CreateScope();
         using var secondScope = provider.CreateScope();
 
-        var mediator = firstScope.ServiceProvider.GetRequiredService<IMediator>();
+        var herald = firstScope.ServiceProvider.GetRequiredService<IHerald>();
 
-        Assert.Same(mediator, firstScope.ServiceProvider.GetRequiredService<ISender>());
-        Assert.Same(mediator, firstScope.ServiceProvider.GetRequiredService<IPublisher>());
-        Assert.NotSame(mediator, secondScope.ServiceProvider.GetRequiredService<IMediator>());
+        Assert.Same(herald, firstScope.ServiceProvider.GetRequiredService<ISender>());
+        Assert.Same(herald, firstScope.ServiceProvider.GetRequiredService<IPublisher>());
+        Assert.NotSame(herald, secondScope.ServiceProvider.GetRequiredService<IHerald>());
         Assert.All(
-            services.Where(descriptor => descriptor.ServiceType == typeof(IMediator) || descriptor.ServiceType == typeof(ISender) || descriptor.ServiceType == typeof(IPublisher)),
+            services.Where(descriptor => descriptor.ServiceType == typeof(IHerald) || descriptor.ServiceType == typeof(ISender) || descriptor.ServiceType == typeof(IPublisher)),
             descriptor => Assert.Equal(ServiceLifetime.Scoped, descriptor.Lifetime));
     }
 
     [Fact]
-    public void SingletonLifetime_SenderAndPublisherResolveSameMediator()
+    public void SingletonLifetime_SenderAndPublisherResolveSameHerald()
     {
         using var provider = TestHost.Build(configuration => configuration.Lifetime = ServiceLifetime.Singleton);
 
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        Assert.Same(mediator, provider.GetRequiredService<IMediator>());
-        Assert.Same(mediator, provider.GetRequiredService<ISender>());
-        Assert.Same(mediator, provider.GetRequiredService<IPublisher>());
+        Assert.Same(herald, provider.GetRequiredService<IHerald>());
+        Assert.Same(herald, provider.GetRequiredService<ISender>());
+        Assert.Same(herald, provider.GetRequiredService<IPublisher>());
     }
 
     [Fact]
@@ -114,11 +114,11 @@ public sealed class RegistrationTests
             .RegisterServicesFromAssemblyContaining<CallLog>()
             .AddOpenBehavior(typeof(RecordingOpenBehavior<,>)));
         using var provider = TestHost.BuildProvider(services);
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        await mediator.Send(new Ping("twice"));
-        await mediator.Send(new VoidCommand("twice"));
-        await mediator.Publish(new OrderPlaced());
+        await herald.Send(new Ping("twice"));
+        await herald.Send(new VoidCommand("twice"));
+        await herald.Publish(new OrderPlaced());
 
         var entries = provider.GetRequiredService<CallLog>().Entries;
         Assert.Equal(registrationCount, services.Count);
@@ -133,11 +133,11 @@ public sealed class RegistrationTests
     public async Task ClassImplementingSeveralHandlerInterfaces_IsRegisteredForEach()
     {
         using var provider = TestHost.Build();
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        Assert.Equal("multi", await mediator.Send(new MultiRequest()));
-        await mediator.Send(new MultiVoidRequest());
-        await mediator.Publish(new MultiNotification());
+        Assert.Equal("multi", await herald.Send(new MultiRequest()));
+        await herald.Send(new MultiVoidRequest());
+        await herald.Publish(new MultiNotification());
 
         Assert.Equal(
             new[] { "handler:MultiVoidRequest", "handler:MultiNotification" },
@@ -149,16 +149,16 @@ public sealed class RegistrationTests
     {
         var services = TestHost.CreateServices();
         using var provider = TestHost.BuildProvider(services);
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
         Assert.IsType<InheritedRequestHandler>(Assert.Single(provider.GetServices<IRequestHandler<InheritedRequest, string>>()));
-        Assert.Equal("derived", await mediator.Send(new InheritedRequest()));
+        Assert.Equal("derived", await herald.Send(new InheritedRequest()));
         Assert.DoesNotContain(services, descriptor => descriptor.ImplementationType == typeof(InheritedRequestHandlerBase));
         Assert.DoesNotContain(
             services,
             descriptor => descriptor.ImplementationType is { IsGenericType: true } type
                 && type.GetGenericTypeDefinition() == typeof(GenericRequestHandler<>));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => mediator.Send(new GenericRequest<int>(1)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => herald.Send(new GenericRequest<int>(1)));
     }
 
     [Fact]

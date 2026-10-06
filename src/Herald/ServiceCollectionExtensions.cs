@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Herald'ı kaydeder: verilen assembly'lerdeki handler'ları tarar, yapılandırmadaki behavior'ları ekler ve
-    /// <see cref="IMediator"/>, <see cref="ISender"/>, <see cref="IPublisher"/> servislerini kaydeder.
+    /// <see cref="IHerald"/>, <see cref="ISender"/>, <see cref="IPublisher"/> servislerini kaydeder.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -27,7 +27,7 @@ public static class ServiceCollectionExtensions
     /// tüm sınıflar Transient olarak kaydedilir. Bir sınıf birden fazla handler arayüzü uyguluyorsa hepsi kaydedilir.
     /// </para>
     /// <para>
-    /// Metot birden fazla kez çağrılabilir; daha önce kaydedilmiş handler, behavior ve mediator kayıtları tekrar eklenmez.
+    /// Metot birden fazla kez çağrılabilir; daha önce kaydedilmiş handler, behavior ve <see cref="IHerald"/> kayıtları tekrar eklenmez.
     /// </para>
     /// </remarks>
     /// <param name="services">Servis koleksiyonu.</param>
@@ -72,9 +72,9 @@ public static class ServiceCollectionExtensions
             services.TryAddEnumerable(descriptor);
         }
 
-        services.TryAdd(new ServiceDescriptor(typeof(IMediator), typeof(Mediator), heraldConfiguration.Lifetime));
-        services.TryAdd(new ServiceDescriptor(typeof(ISender), static provider => provider.GetRequiredService<IMediator>(), heraldConfiguration.Lifetime));
-        services.TryAdd(new ServiceDescriptor(typeof(IPublisher), static provider => provider.GetRequiredService<IMediator>(), heraldConfiguration.Lifetime));
+        services.TryAdd(new ServiceDescriptor(typeof(IHerald), typeof(HeraldDispatcher), heraldConfiguration.Lifetime));
+        services.TryAdd(new ServiceDescriptor(typeof(ISender), static provider => provider.GetRequiredService<IHerald>(), heraldConfiguration.Lifetime));
+        services.TryAdd(new ServiceDescriptor(typeof(IPublisher), static provider => provider.GetRequiredService<IHerald>(), heraldConfiguration.Lifetime));
 
         return services;
     }

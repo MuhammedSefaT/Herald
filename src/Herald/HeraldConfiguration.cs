@@ -5,7 +5,7 @@ namespace Herald;
 
 /// <summary>
 /// <see cref="ServiceCollectionExtensions.AddHerald"/> yapılandırması: taranacak assembly'ler,
-/// pipeline behavior'ları ve <see cref="IMediator"/> kaydının ömrü.
+/// pipeline behavior'ları ve <see cref="IHerald"/> kaydının ömrü.
 /// </summary>
 public sealed class HeraldConfiguration
 {
@@ -13,8 +13,8 @@ public sealed class HeraldConfiguration
     private readonly List<ServiceDescriptor> _behaviors = [];
 
     /// <summary>
-    /// <see cref="IMediator"/> kaydının ömrü. <see cref="ISender"/> ve <see cref="IPublisher"/> aynı ömürle
-    /// <see cref="IMediator"/> kaydına yönlendirilir. Varsayılan değer <see cref="ServiceLifetime.Transient"/>.
+    /// <see cref="IHerald"/> kaydının ömrü. <see cref="ISender"/> ve <see cref="IPublisher"/> aynı ömürle
+    /// <see cref="IHerald"/> kaydına yönlendirilir. Varsayılan değer <see cref="ServiceLifetime.Transient"/>.
     /// </summary>
     public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
 

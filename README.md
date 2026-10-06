@@ -1,6 +1,6 @@
 # Herald
 
-Herald, MediatR ile aynı kullanım şekline ve isimlendirmeye sahip, sıfırdan yazılmış bir .NET mediator kütüphanesidir. MediatR ticari lisansa geçtiği için kişisel projelerde onun yerine kullanılmak üzere yazıldı.
+Herald, .NET uygulamaları için hafif bir mediator kütüphanesidir. İstekleri handler'lara, bildirimleri dinleyicilerine iletir; loglama ve doğrulama gibi kesişen işleri pipeline behavior'larla çözer.
 
 - İstek/handler (dönüş değerli ve dönüşsüz), bildirim (notification) ve pipeline behavior desteği
 - `Microsoft.Extensions.DependencyInjection` ile `AddHerald` kaydı
@@ -8,8 +8,8 @@ Herald, MediatR ile aynı kullanım şekline ve isimlendirmeye sahip, sıfırdan
 
 | Paket | İçerik | Bağımlılık |
 |---|---|---|
-| `Herald.Abstractions` | `IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher`, `IMediator`, `Unit` | Yok |
-| `Herald` | `Mediator`, `AddHerald` | `Herald.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions` 8.x |
+| `Herald.Abstractions` | `IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher`, `IHerald`, `Unit` | Yok |
+| `Herald` | `HeraldDispatcher`, `AddHerald` | `Herald.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions` 8.x |
 
 Tüm public tipler `Herald` namespace'indedir.
 
@@ -69,7 +69,7 @@ builder.Services.AddHerald(configuration =>
 
 - Verilen assembly'lerdeki abstract ve açık generic olmayan tüm `IRequestHandler<,>`, `IRequestHandler<>` ve `INotificationHandler<>` sınıfları Transient olarak kaydedilir.
 - Bir istek tipinin birden fazla handler'ı varsa `AddHerald` `InvalidOperationException` fırlatır.
-- `IMediator` seçilen ömürle kaydedilir. `ISender` ve `IPublisher` aynı `IMediator` kaydına yönlendirilir.
+- `IHerald` seçilen ömürle kaydedilir. `ISender` ve `IPublisher` aynı `IHerald` kaydına yönlendirilir.
 - `AddHerald` birden fazla kez çağrılabilir. Daha önce eklenmiş kayıtlar tekrar eklenmez.
 
 ## Örnekler
@@ -167,23 +167,27 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior
 
 İstekler, handler'lar, bildirimler ve behavior'lar yalnızca sözleşmelere ihtiyaç duyar. `AddHerald` çağrısı yalnızca composition root'ta yapılır. `Herald` paketi `Herald.Abstractions`'ı da getirir.
 
-## MediatR'dan geçiş
+## Mevcut projeye geçiş
 
-1. Paket referanslarını değiştirin: `MediatR` yerine `Herald`, `MediatR.Contracts` yerine `Herald.Abstractions`.
-2. Namespace'i ve kayıt metodunu değiştirin:
+`IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher` ve `Unit` sözleşmelerini kullanan bir projede:
 
-   ```diff
-   - global using MediatR;
-   + global using Herald;
+1. Önceki mediator paketlerinin referanslarını kaldırıp `Herald` ve `Herald.Abstractions` paketlerini ekleyin.
+2. `global using` satırındaki namespace'i `Herald` yapın ve DI kaydını `AddHerald` ile yapın:
 
-   - services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
-   + services.AddHerald(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+   ```csharp
+   global using Herald;
+
+   services.AddHerald(configuration => configuration.RegisterServicesFromAssemblyContaining<Program>());
    ```
 
-Herald, MediatR'ın şu özelliklerini içermez; bunları kullanan kod derlenmez ve yeniden yazılması gerekir:
+3. Hem istek gönderen hem bildirim yayınlayan birleşik arayüz olarak `IHerald` kullanın. `ISender` ve `IPublisher` kullanan kod değişmez.
 
-- Stream istekleri (`IStreamRequest`, `CreateStream`)
-- Pre/post processor'lar ve exception handler/action'lar
-- Notification publisher stratejileri (ör. paralel yayın)
+## Kapsam dışı
 
-Ayrıca handler'lar bildirimin ve isteğin tam tipine göre çözümlenir: temel bir bildirim tipine yazılmış handler, türetilmiş bildirimler için çağrılmaz. Açık generic handler'lar taranmaz.
+Herald şunları içermez:
+
+- Stream istekleri
+- Pre/post processor'lar ve exception handler'lar
+- Bildirimlerin paralel yayını gibi özel yayın stratejileri
+
+Handler'lar isteğin ve bildirimin tam tipine göre çözümlenir: temel bir bildirim tipine yazılmış handler, türetilmiş bildirimler için çağrılmaz. Açık generic handler'lar taranmaz.

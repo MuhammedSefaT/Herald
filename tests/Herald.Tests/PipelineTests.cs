@@ -13,9 +13,9 @@ public sealed class PipelineTests
             .AddBehavior<IPipelineBehavior<Ping, Pong>, OuterPingBehavior>()
             .AddOpenBehavior(typeof(MiddleOpenBehavior<,>))
             .AddBehavior(typeof(IPipelineBehavior<Ping, Pong>), typeof(InnerPingBehavior)));
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        await mediator.Send(new Ping("order"));
+        await herald.Send(new Ping("order"));
 
         Assert.Equal(
             new[] { "outer:before", "middle:before", "inner:before", "handler:Ping", "inner:after", "middle:after", "outer:after" },
@@ -29,9 +29,9 @@ public sealed class PipelineTests
             .AddBehavior<IPipelineBehavior<Ping, Pong>, InnerPingBehavior>()
             .AddOpenBehavior(typeof(MiddleOpenBehavior<,>))
             .AddBehavior<IPipelineBehavior<Ping, Pong>, OuterPingBehavior>());
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        await mediator.Send(new Ping("order"));
+        await herald.Send(new Ping("order"));
 
         Assert.Equal(
             new[] { "inner:before", "middle:before", "outer:before", "handler:Ping", "outer:after", "middle:after", "inner:after" },
@@ -42,11 +42,11 @@ public sealed class PipelineTests
     public async Task OpenBehavior_RunsForRequestsWithAndWithoutResponse()
     {
         using var provider = TestHost.Build(configuration => configuration.AddOpenBehavior(typeof(RecordingOpenBehavior<,>)));
-        var mediator = provider.GetRequiredService<IMediator>();
+        var herald = provider.GetRequiredService<IHerald>();
 
-        await mediator.Send(new Ping("open"));
-        await mediator.Send(new VoidCommand("open"));
-        await mediator.Send((object)new VoidCommand("untyped"));
+        await herald.Send(new Ping("open"));
+        await herald.Send(new VoidCommand("open"));
+        await herald.Send((object)new VoidCommand("untyped"));
 
         Assert.Equal(
             new[]

@@ -3,14 +3,14 @@ using System.Collections.Concurrent;
 namespace Herald;
 
 /// <summary>
-/// <see cref="IMediator"/> arayüzünün varsayılan uygulaması. Handler ve behavior'ları
+/// <see cref="IHerald"/> arayüzünün varsayılan uygulaması. Handler ve behavior'ları
 /// constructor'da verilen <see cref="IServiceProvider"/> üzerinden çözümler.
 /// </summary>
 /// <remarks>
 /// Her istek ve bildirim tipi için gerekli wrapper ilk kullanımda bir kez oluşturulur ve
 /// sonraki çağrılarda önbellekten kullanılır; çağrı başına reflection yapılmaz.
 /// </remarks>
-public sealed class Mediator : IMediator
+public sealed class HeraldDispatcher : IHerald
 {
     private static readonly ConcurrentDictionary<Type, RequestHandlerBase> RequestHandlers = new();
     private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> NotificationHandlers = new();
@@ -18,11 +18,11 @@ public sealed class Mediator : IMediator
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
-    /// Yeni bir <see cref="Mediator"/> örneği oluşturur.
+    /// Yeni bir <see cref="HeraldDispatcher"/> örneği oluşturur.
     /// </summary>
     /// <param name="serviceProvider">Handler ve behavior'ların çözümleneceği servis sağlayıcı.</param>
     /// <exception cref="ArgumentNullException"><paramref name="serviceProvider"/> null ise.</exception>
-    public Mediator(IServiceProvider serviceProvider)
+    public HeraldDispatcher(IServiceProvider serviceProvider)
     {
         ArgumentNullException.ThrowIfNull(serviceProvider);
         _serviceProvider = serviceProvider;
