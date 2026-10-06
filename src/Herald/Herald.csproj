@@ -22,4 +22,8 @@
     <ProjectReference Include="..\Herald.Abstractions\Herald.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Herald.Tests" />
+  </ItemGroup>
+
 </Project>

@@ -9,7 +9,7 @@ Herald, .NET uygulamaları için hafif bir mediator kütüphanesidir. İstekleri
 | Paket | İçerik | Bağımlılık |
 |---|---|---|
 | `Herald.Abstractions` | `IRequest`, `IRequestHandler`, `INotification`, `INotificationHandler`, `IPipelineBehavior`, `ISender`, `IPublisher`, `IHerald`, `Unit` | Yok |
-| `Herald` | `HeraldDispatcher`, `AddHerald` | `Herald.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions` 8.x |
+| `Herald` | `AddHerald`, `HeraldConfiguration` | `Herald.Abstractions`, `Microsoft.Extensions.DependencyInjection.Abstractions` 8.x |
 
 Tüm public tipler `Herald` namespace'indedir.
 

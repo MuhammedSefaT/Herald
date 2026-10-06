@@ -10,7 +10,7 @@ namespace Herald;
 /// Her istek ve bildirim tipi için gerekli wrapper ilk kullanımda bir kez oluşturulur ve
 /// sonraki çağrılarda önbellekten kullanılır; çağrı başına reflection yapılmaz.
 /// </remarks>
-public sealed class HeraldDispatcher : IHerald
+internal sealed class HeraldDispatcher : IHerald
 {
     private static readonly ConcurrentDictionary<Type, RequestHandlerBase> RequestHandlers = new();
     private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> NotificationHandlers = new();
