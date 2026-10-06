@@ -130,6 +130,24 @@ public sealed class RegistrationTests
     }
 
     [Fact]
+    public async Task AddHerald_AssemblyWithUnloadableTypes_RegistersLoadableHandlers()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<CallLog>();
+        var assembly = new PartiallyLoadableAssembly(typeof(PingHandler));
+
+        services.AddHerald(configuration => configuration.RegisterServicesFromAssembly(assembly));
+        using var provider = TestHost.BuildProvider(services);
+        var herald = provider.GetRequiredService<IHerald>();
+
+        Assert.Equal(new Pong("partial pong"), await herald.Send(new Ping("partial")));
+        Assert.Single(
+            services,
+            descriptor => descriptor.ServiceType.IsGenericType
+                && descriptor.ServiceType.GetGenericTypeDefinition() == typeof(IRequestHandler<,>));
+    }
+
+    [Fact]
     public async Task ClassImplementingSeveralHandlerInterfaces_IsRegisteredForEach()
     {
         using var provider = TestHost.Build();

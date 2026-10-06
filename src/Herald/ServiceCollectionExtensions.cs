@@ -81,11 +81,26 @@ public static class ServiceCollectionExtensions
 
     private static List<(Type ServiceType, Type ImplementationType)> FindHandlers(IEnumerable<Assembly> assemblies) =>
         (from assembly in assemblies
-         from type in assembly.GetTypes()
+         from type in GetLoadableTypes(assembly)
          where type.IsClass && !type.IsAbstract && !type.ContainsGenericParameters
          from serviceType in type.GetInterfaces()
          where serviceType.IsGenericType && HandlerInterfaces.Contains(serviceType.GetGenericTypeDefinition())
          select (serviceType, type)).ToList();
+
+    /// <summary>
+    /// Assembly'deki tipleri döndürür. Bazı tipler yüklenemiyorsa yalnızca yüklenebilenlerle devam eder.
+    /// </summary>
+    private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+    {
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException exception)
+        {
+            return exception.Types.OfType<Type>();
+        }
+    }
 
     /// <summary>
     /// Request handler'larını mevcut kayıtlarla birlikte kontrol eder ve henüz kaydedilmemiş olanları döndürür.
