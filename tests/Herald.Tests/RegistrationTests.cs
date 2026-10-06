@@ -219,6 +219,52 @@ public sealed class RegistrationTests
     }
 
     [Fact]
+    public void AddBehavior_ServiceTypeThatIsNotPipelineBehavior_ThrowsArgumentException()
+    {
+        var configuration = new HeraldConfiguration();
+
+        var byType = Assert.Throws<ArgumentException>(
+            () => configuration.AddBehavior(typeof(IRequestHandler<Ping, Pong>), typeof(PingHandler)));
+        var byGeneric = Assert.Throws<ArgumentException>(
+            () => configuration.AddBehavior<IRequestHandler<Ping, Pong>, PingHandler>());
+
+        Assert.Equal("serviceType", byType.ParamName);
+        Assert.Equal("serviceType", byGeneric.ParamName);
+    }
+
+    [Fact]
+    public void AddBehavior_ImplementationThatDoesNotImplementService_ThrowsArgumentException()
+    {
+        var configuration = new HeraldConfiguration();
+
+        var exceptions = new[]
+        {
+            Assert.Throws<ArgumentException>(
+                () => configuration.AddBehavior(typeof(IPipelineBehavior<Ping, Pong>), typeof(PingHandler))),
+            Assert.Throws<ArgumentException>(
+                () => configuration.AddBehavior(typeof(IPipelineBehavior<VoidCommand, Unit>), typeof(OuterPingBehavior))),
+            Assert.Throws<ArgumentException>(
+                () => configuration.AddBehavior(typeof(IPipelineBehavior<Ping, Pong>), typeof(MiddleOpenBehavior<,>))),
+            Assert.Throws<ArgumentException>(
+                () => configuration.AddBehavior(typeof(IPipelineBehavior<,>), typeof(OuterPingBehavior))),
+        };
+
+        Assert.All(exceptions, exception => Assert.Equal("implementationType", exception.ParamName));
+    }
+
+    [Fact]
+    public async Task AddBehavior_OpenServiceWithOpenImplementation_RunsBehavior()
+    {
+        using var provider = TestHost.Build(configuration =>
+            configuration.AddBehavior(typeof(IPipelineBehavior<,>), typeof(RecordingOpenBehavior<,>)));
+        var herald = provider.GetRequiredService<IHerald>();
+
+        await herald.Send(new Ping("open"));
+
+        Assert.Equal(new[] { "behavior:Ping:Pong", "handler:Ping" }, provider.GetRequiredService<CallLog>().Entries);
+    }
+
+    [Fact]
     public void ConfigurationMethods_ReturnSameInstance()
     {
         var configuration = new HeraldConfiguration();

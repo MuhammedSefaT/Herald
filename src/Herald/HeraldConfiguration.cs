@@ -73,6 +73,7 @@ public sealed class HeraldConfiguration
     /// <typeparam name="TImplementation">Behavior sınıfı.</typeparam>
     /// <param name="lifetime">Behavior kaydının ömrü.</param>
     /// <returns>Zincirleme çağrı için aynı yapılandırma.</returns>
+    /// <exception cref="ArgumentException"><typeparamref name="TService"/> bir <see cref="IPipelineBehavior{TRequest, TResponse}"/> değilse.</exception>
     public HeraldConfiguration AddBehavior<TService, TImplementation>(ServiceLifetime lifetime = ServiceLifetime.Transient)
         where TService : class
         where TImplementation : class, TService =>
@@ -86,10 +87,33 @@ public sealed class HeraldConfiguration
     /// <param name="lifetime">Behavior kaydının ömrü.</param>
     /// <returns>Zincirleme çağrı için aynı yapılandırma.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="serviceType"/> veya <paramref name="implementationType"/> null ise.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="serviceType"/> bir <see cref="IPipelineBehavior{TRequest, TResponse}"/> değilse veya
+    /// <paramref name="implementationType"/> <paramref name="serviceType"/> tipini uygulamıyorsa. Açık generic
+    /// <c>IPipelineBehavior&lt;,&gt;</c> servis tipi için implementasyon da açık generic olmalıdır.
+    /// </exception>
     public HeraldConfiguration AddBehavior(Type serviceType, Type implementationType, ServiceLifetime lifetime = ServiceLifetime.Transient)
     {
         ArgumentNullException.ThrowIfNull(serviceType);
         ArgumentNullException.ThrowIfNull(implementationType);
+
+        if (!serviceType.IsGenericType || serviceType.GetGenericTypeDefinition() != typeof(IPipelineBehavior<,>))
+        {
+            throw new ArgumentException(
+                $"Type '{serviceType}' is not IPipelineBehavior<TRequest, TResponse>.",
+                nameof(serviceType));
+        }
+
+        var implementsService = serviceType.IsGenericTypeDefinition
+            ? implementationType.IsGenericTypeDefinition && ImplementsPipelineBehavior(implementationType)
+            : serviceType.IsAssignableFrom(implementationType);
+
+        if (!implementsService)
+        {
+            throw new ArgumentException(
+                $"Type '{implementationType}' does not implement '{serviceType}'.",
+                nameof(implementationType));
+        }
 
         _behaviors.Add(new ServiceDescriptor(serviceType, implementationType, lifetime));
         return this;
@@ -118,10 +142,7 @@ public sealed class HeraldConfiguration
                 nameof(openBehaviorType));
         }
 
-        var implementsPipelineBehavior = openBehaviorType.GetInterfaces()
-            .Any(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>));
-
-        if (!implementsPipelineBehavior)
+        if (!ImplementsPipelineBehavior(openBehaviorType))
         {
             throw new ArgumentException(
                 $"Type '{openBehaviorType.FullName}' does not implement IPipelineBehavior<TRequest, TResponse>.",
@@ -131,4 +152,8 @@ public sealed class HeraldConfiguration
         _behaviors.Add(new ServiceDescriptor(typeof(IPipelineBehavior<,>), openBehaviorType, lifetime));
         return this;
     }
+
+    private static bool ImplementsPipelineBehavior(Type type) =>
+        type.GetInterfaces().Any(implemented =>
+            implemented.IsGenericType && implemented.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>));
 }
