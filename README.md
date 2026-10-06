@@ -23,7 +23,7 @@ Paketler NuGet.org'da yayınlanmaz, lokal bir klasörden kullanılır.
    dotnet pack -c Release -o ./artifacts
    ```
 
-2. Herald'ı kullanacak solution'ın köküne bir `nuget.config` ekleyin. `herald` kaynağının yolunu kendi klonunuzun `artifacts` klasörüne göre değiştirin. Package source mapping sayesinde `Herald` ve `Herald.*` paketleri yalnızca lokal klasörden, diğer paketler nuget.org'dan gelir.
+2. Herald'ı kullanacak solution'ın köküne bir `nuget.config` ekleyin. `herald` kaynağındaki `/path/to/Herald/artifacts` örnek yolunu kendi klonunuzun `artifacts` klasörüyle değiştirin; yol mutlak ya da `nuget.config` dosyasına göre göreceli olabilir. Package source mapping sayesinde `Herald` ve `Herald.*` paketleri yalnızca lokal klasörden, diğer paketler nuget.org'dan gelir.
 
    ```xml
    <?xml version="1.0" encoding="utf-8"?>
@@ -31,7 +31,7 @@ Paketler NuGet.org'da yayınlanmaz, lokal bir klasörden kullanılır.
      <packageSources>
        <clear />
        <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-       <add key="herald" value="/path/to/Herald\artifacts" />
+       <add key="herald" value="/path/to/Herald/artifacts" />
      </packageSources>
      <packageSourceMapping>
        <packageSource key="nuget.org">
@@ -155,6 +155,8 @@ public sealed class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior
 - Behavior'lar eklenme sırasıyla çalışır. İlk eklenen en dışta, handler en içtedir.
 - Dönüş değeri olmayan istekler behavior'larda `TResponse = Unit` olarak görünür. Handler'lar `Unit` görmez.
 - `next()` parametresiz çağrılırsa behavior'a gelen `cancellationToken` iletilir. `next(token)` verilen token'ı iletir.
+
+> **Uyarı:** Pipeline behavior'larında `TRequest` için `IRequest<TResponse>` constraint'i kullanmayın; dönüşü olmayan isteklerde behavior sessizce atlanır. `where TRequest : notnull` kullanın.
 
 ## Katmanlar
 
